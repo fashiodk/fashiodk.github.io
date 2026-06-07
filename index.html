@@ -481,6 +481,22 @@ const styles = `
   .screen-fade { animation: fadeIn 0.25s ease-out both; }
   .safe-top { padding-top: env(safe-area-inset-top); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+  /* ===== Home menu redesign ===== */
+  @keyframes pf-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+  .pf-rise { animation: pf-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes pf-glow { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.08); } }
+  .pf-glow { animation: pf-glow 5.5s ease-in-out infinite; }
+  @keyframes pf-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+  .pf-blink { animation: pf-blink 1.6s steps(1, end) infinite; }
+  .pf-grid {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .pf-press { transition: transform 0.12s ease, filter 0.12s ease; }
+  .pf-press:active { transform: scale(0.985); filter: brightness(1.07); }
 `;
 
 const COLORS = {
@@ -795,6 +811,92 @@ function App() {
   );
 }
 
+function CornerTicks({ color, size = 11, inset = 9, weight = 1.5 }) {
+  const b = { position: 'absolute', width: size, height: size, pointerEvents: 'none' };
+  return (
+    <>
+      <div style={{ ...b, top: inset, left: inset, borderTop: `${weight}px solid ${color}`, borderLeft: `${weight}px solid ${color}` }} />
+      <div style={{ ...b, top: inset, right: inset, borderTop: `${weight}px solid ${color}`, borderRight: `${weight}px solid ${color}` }} />
+      <div style={{ ...b, bottom: inset, left: inset, borderBottom: `${weight}px solid ${color}`, borderLeft: `${weight}px solid ${color}` }} />
+      <div style={{ ...b, bottom: inset, right: inset, borderBottom: `${weight}px solid ${color}`, borderRight: `${weight}px solid ${color}` }} />
+    </>
+  );
+}
+
+function SectionLabel({ text, right, rightColor }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
+      <div className="mono" style={{ fontSize: 9.5, letterSpacing: '0.28em', color: COLORS.textDim, whiteSpace: 'nowrap' }}>{text}</div>
+      <div style={{ flex: 1, height: 1, background: COLORS.border }} />
+      {right && (
+        <div className="mono" style={{ fontSize: 9, letterSpacing: '0.2em', color: rightColor || COLORS.textMore, whiteSpace: 'nowrap' }}>{right}</div>
+      )}
+    </div>
+  );
+}
+
+function ModuleRow({ num, title, subtitle, icon, active, locked, live, onClick }) {
+  return (
+    <button
+      onClick={locked ? undefined : onClick}
+      className={locked ? '' : 'pf-press'}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '17px 16px',
+        marginBottom: 11,
+        border: `1px solid ${active ? COLORS.accent : COLORS.border}`,
+        background: active ? COLORS.accent : COLORS.surface,
+        color: active ? '#000' : COLORS.text,
+        textAlign: 'left',
+        cursor: locked ? 'default' : 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div className="display" style={{
+        fontSize: 30,
+        lineHeight: 1,
+        minWidth: 40,
+        color: active ? '#000' : COLORS.textMore,
+      }}>{num}</div>
+      <div style={{
+        width: 1,
+        alignSelf: 'stretch',
+        background: active ? 'rgba(0,0,0,0.25)' : COLORS.border,
+      }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="display" style={{ fontSize: 18, letterSpacing: '0.08em', lineHeight: 1, marginBottom: 6 }}>{title}</div>
+        <div className="mono" style={{
+          fontSize: 9.5,
+          letterSpacing: '0.06em',
+          color: active ? 'rgba(0,0,0,0.65)' : COLORS.textDim,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}>{subtitle}</div>
+      </div>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', opacity: locked ? 0.5 : 1 }}>
+        {locked ? (
+          <div className="mono" style={{
+            fontSize: 8.5,
+            letterSpacing: '0.18em',
+            color: COLORS.textMore,
+            border: `1px solid ${COLORS.border}`,
+            padding: '4px 7px',
+          }}>SNART</div>
+        ) : live ? (
+          <Play size={24} strokeWidth={2.5} fill="#000" color="#000" />
+        ) : (
+          <div style={{ color: active ? '#000' : COLORS.text }}>{icon}</div>
+        )}
+      </div>
+    </button>
+  );
+}
+
 function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
   const [time, setTime] = useState(new Date());
   const [showBreakdown, setShowBreakdown] = useState(false);
@@ -842,150 +944,97 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
+      overflowX: 'hidden',
+      background: COLORS.bg,
     }}>
-      {/* TOP HEADER — premium minimalist bar */}
-      <div style={{
-        padding: '20px 24px 22px',
-        position: 'relative',
-        background: COLORS.bg,
-      }}>
-        {/* Logo mark + brand name */}
+      {/* ===== STATUS BAR ===== */}
+      <div className="safe-top" style={{ background: COLORS.bg }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: 18,
+          padding: '15px 20px 13px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Logo mark */}
-            <img src={LOGO_EMBLEM} alt="PeakForm" style={{ height: 30, width: 'auto', display: 'block' }} />
-            <div>
-              <div className="display" style={{
-                fontSize: 14,
-                letterSpacing: '0.2em',
-                lineHeight: 1,
-              }}>PEAKFORM</div>
-              <div className="mono" style={{
-                fontSize: 8,
-                letterSpacing: '0.25em',
-                color: COLORS.textDim,
-                marginTop: 2,
-              }}>PERFORMANCE SYSTEM</div>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <img src={LOGO_EMBLEM} alt="" style={{ height: 24, width: 'auto', display: 'block' }} />
+            <div className="display" style={{ fontSize: 13, letterSpacing: '0.22em' }}>PEAKFORM</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div className="pulse" style={{ width: 5, height: 5, background: COLORS.accent, borderRadius: '50%' }} />
-            <div className="mono" style={{ fontSize: 11, letterSpacing: '0.1em' }}>
-              {timeStr}
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <div className="pf-blink" style={{ width: 6, height: 6, borderRadius: '50%', background: COLORS.accent }} />
+            <div className="mono" style={{ fontSize: 11, letterSpacing: '0.08em', color: COLORS.textDim }}>{timeStr}</div>
+          </div>
+        </div>
+        <div style={{ height: 1, background: COLORS.border }} />
+      </div>
+
+      {/* ===== HERO ===== */}
+      <div className="pf-grid pf-rise" style={{
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '32px 22px 28px',
+        borderBottom: `1px solid ${COLORS.border}`,
+      }}>
+        <div className="pf-glow" style={{
+          position: 'absolute', top: -100, right: -80, width: 280, height: 280,
+          background: `radial-gradient(circle, ${COLORS.accent}38, transparent 68%)`,
+          pointerEvents: 'none',
+        }} />
+        <img src={LOGO_EMBLEM} alt="" style={{
+          position: 'absolute', right: -30, bottom: -40, width: 210, opacity: 0.05,
+          pointerEvents: 'none', transform: 'rotate(-6deg)',
+        }} />
+        <CornerTicks color={COLORS.accent} size={12} inset={10} />
+
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: 24, position: 'relative',
+        }}>
+          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.3em', color: COLORS.textMore }}>
+            PERFORMANCE&nbsp;OS
+          </div>
+          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: COLORS.textMore }}>
+            v1.0 — {dayName.slice(0, 3)}
           </div>
         </div>
 
-        {/* Bottom divider with date stamp */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
+          fontFamily: "'Archivo', sans-serif",
+          fontWeight: 900,
+          fontStyle: 'italic',
+          fontSize: 'clamp(40px, 13vw, 54px)',
+          lineHeight: 0.88,
+          color: COLORS.accent,
+          letterSpacing: '-0.01em',
+          whiteSpace: 'nowrap',
+          position: 'relative',
         }}>
-          <div style={{ height: 1, flex: 1, background: COLORS.border }} />
-          <div className="mono" style={{
-            fontSize: 9,
-            letterSpacing: '0.3em',
-            color: COLORS.textDim,
-          }}>
-            {dayName} · {dateNum}
+          PEAKFORM
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, position: 'relative' }}>
+          <div style={{ width: 26, height: 2, background: COLORS.accent, flexShrink: 0 }} />
+          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: COLORS.textDim, whiteSpace: 'nowrap' }}>
+            STRENGTH · PHYSIQUE · RECOVERY
           </div>
-          <div style={{ height: 1, flex: 1, background: COLORS.border }} />
         </div>
       </div>
 
-      {/* GREETING */}
-      <div style={{ padding: '24px 24px 0' }}>
-        <div className="mono" style={{
-          fontSize: 10,
-          color: COLORS.accent,
-          letterSpacing: '0.3em',
-          marginBottom: 8,
-        }}>
+      {/* ===== GREETING ===== */}
+      <div className="pf-rise" style={{ padding: '26px 22px 6px', animationDelay: '0.07s' }}>
+        <div className="mono" style={{ fontSize: 10, letterSpacing: '0.3em', color: COLORS.accent, marginBottom: 10 }}>
           — {greeting}
         </div>
-        <div className="display" style={{
-          fontSize: 38,
-          lineHeight: 1,
-          letterSpacing: '0.02em',
-        }}>
-          YUNUS.
+        <div className="display" style={{ fontSize: 48, lineHeight: 0.88, letterSpacing: '0.01em' }}>
+          YUNUS<span style={{ color: COLORS.accent }}>.</span>
+        </div>
+        <div className="mono" style={{ fontSize: 9.5, color: COLORS.textMore, letterSpacing: '0.14em', marginTop: 12 }}>
+          {fullDate.toUpperCase()}
         </div>
       </div>
 
-      {/* BRAND BLOCK */}
-      <div style={{
-        padding: '40px 24px',
-        position: 'relative',
-        margin: '32px 0 8px',
-      }}>
-        <div style={{
-          position: 'absolute',
-          left: 24,
-          top: 40,
-          bottom: 40,
-          width: 2,
-          background: COLORS.accent,
-        }} />
-        <div style={{ paddingLeft: 24 }}>
-          <div className="mono" style={{
-            fontSize: 9,
-            color: COLORS.textMore,
-            letterSpacing: '0.35em',
-            marginBottom: 16,
-          }}>
-            SYSTEM v1.0  ·  EST. 2026
-          </div>
-
-          <div style={{
-            fontFamily: "'Archivo', sans-serif",
-            fontWeight: 900,
-            fontStyle: 'italic',
-            fontSize: 'clamp(46px, 15vw, 66px)',
-            lineHeight: 0.95,
-            color: COLORS.accent,
-            letterSpacing: '-0.02em',
-            marginBottom: 4,
-          }}>
-            PEAKFORM
-          </div>
-
-          {/* Flourished tagline */}
-          <div style={{
-            marginTop: 18,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-          }}>
-            <span style={{ color: COLORS.accent, fontSize: 12 }}>✦</span>
-            <div className="display" style={{
-              fontSize: 11,
-              letterSpacing: '0.35em',
-              color: COLORS.text,
-            }}>
-              PERFORMANCE SUITE
-            </div>
-            <span style={{ color: COLORS.accent, fontSize: 12 }}>✦</span>
-          </div>
-          <div style={{
-            marginTop: 6,
-            fontSize: 11,
-            color: COLORS.textMore,
-            fontStyle: 'italic',
-            letterSpacing: '0.02em',
-          }}>
-            Strength · Physique · Recovery
-          </div>
-        </div>
-      </div>
-
-      {/* PEAK SCORE */}
-      <div style={{ padding: '0 24px', marginBottom: 28 }}>
+      {/* ===== PEAK SCORE ===== */}
+      <div className="pf-rise" style={{ padding: '26px 22px 0', animationDelay: '0.14s' }}>
+        <SectionLabel text="DAGENS PEAK SCORE" right="● LIVE" rightColor={COLORS.accent} />
         <ScoreRing
           score={score.total}
           weekAvg={scoreData?.weekAvg || 0}
@@ -994,8 +1043,9 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
         />
       </div>
 
-      {/* STATS */}
-      <div style={{ padding: '0 24px', marginBottom: 28 }}>
+      {/* ===== STATS ===== */}
+      <div className="pf-rise" style={{ padding: '28px 22px 0', animationDelay: '0.2s' }}>
+        <SectionLabel text="OVERSIGT" right={totalSessions > 0 ? `${totalSessions} SESSIONS` : null} />
         {totalSessions > 0 ? (
           <div style={{
             display: 'grid',
@@ -1006,12 +1056,7 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
           }}>
             <StatCell label="SESSIONS" value={totalSessions} />
             <StatCell label="ØVELSER" value={totalExercises} />
-            <StatCell
-              label="TOP PR"
-              value={topPR ? `${topPR.kg}` : '—'}
-              unit={topPR ? 'kg' : ''}
-              accent
-            />
+            <StatCell label="TOP PR" value={topPR ? `${topPR.kg}` : '—'} unit={topPR ? 'kg' : ''} accent />
           </div>
         ) : (
           <div style={{
@@ -1023,110 +1068,71 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
             gap: 14,
           }}>
             <div style={{
-              width: 36,
-              height: 36,
+              width: 38, height: 38,
               border: `1px solid ${COLORS.accent}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
             }}>
               <Flame size={18} color={COLORS.accent} />
             </div>
-            <div>
-              <div className="display" style={{ fontSize: 13, letterSpacing: '0.15em', marginBottom: 2 }}>
+            <div style={{ minWidth: 0 }}>
+              <div className="display" style={{ fontSize: 14, letterSpacing: '0.12em', marginBottom: 3 }}>
                 FØRSTE SESSION VENTER
               </div>
-              <div style={{ fontSize: 11, color: COLORS.textDim }}>
-                Start nedenunder for at begynde
+              <div className="mono" style={{ fontSize: 10, color: COLORS.textDim, letterSpacing: '0.04em' }}>
+                Åbn module 01 for at begynde
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* PRIMARY CTA */}
-      <div style={{ padding: '0 24px', marginBottom: 12 }}>
-        <button
+      {/* ===== MODULES ===== */}
+      <div className="pf-rise" style={{ padding: '30px 22px 0', animationDelay: '0.26s' }}>
+        <SectionLabel text="MODULER" right="01 / 03 AKTIV" />
+        <ModuleRow
+          num="01"
+          title={activeSession ? 'GENOPTAG SESSION' : 'WORKOUT TRACKER'}
+          subtitle={activeSession
+            ? `${PROGRAM[activeSession.workoutType]?.name || ''} · TRYK FOR AT FORTSÆTTE`
+            : 'TRAINING · MACROS · SUPPLEMENTS'}
+          icon={<ArrowRight size={24} strokeWidth={2.5} />}
+          active
+          live={!!activeSession}
           onClick={onEnter}
-          style={{
-            background: COLORS.accent,
-            color: '#000',
-            border: 'none',
-            padding: '20px 22px',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            textAlign: 'left',
-            position: 'relative',
-          }}
-        >
-          <div>
-            <div className="mono" style={{ fontSize: 10, letterSpacing: '0.25em', opacity: 0.7, marginBottom: 6 }}>
-              {activeSession ? '● LIVE SESSION I GANG' : 'MODULE 01 / ACTIVE'}
-            </div>
-            <div className="display" style={{ fontSize: 22, letterSpacing: '0.1em', lineHeight: 1 }}>
-              {activeSession ? 'GENOPTAG SESSION' : 'WORKOUT TRACKER'}
-            </div>
-            <div style={{ fontSize: 11, opacity: 0.75, marginTop: 6 }}>
-              {activeSession ? `${PROGRAM[activeSession.workoutType]?.name || ''} · Tryk for at fortsætte` : 'Training · Macros · Supplements'}
-            </div>
-          </div>
-          {activeSession ? <Play size={28} strokeWidth={2.5} fill="#000" /> : <ArrowRight size={28} strokeWidth={2.5} />}
-        </button>
+        />
+        <ModuleRow num="02" title="RECOVERY" subtitle="SLEEP · HRV · MOOD" locked />
+        <ModuleRow num="03" title="ANALYTICS" subtitle="TRENDS · PREDICTIONS" locked />
       </div>
 
-      {/* COMING SOON */}
-      <div style={{ padding: '0 24px' }}>
-        <ComingSoonModule num="02" title="RECOVERY" subtitle="Sleep · HRV · Mood" icon={<Moon size={18} />} />
-        <ComingSoonModule num="03" title="ANALYTICS" subtitle="Trends · Predictions" icon={<Activity size={18} />} />
-      </div>
+      <div style={{ flex: 1, minHeight: 36 }} />
 
-      {/* SPACER */}
-      <div style={{ flex: 1, minHeight: 32 }} />
-
-      {/* FOOTER */}
+      {/* ===== FOOTER ===== */}
       <div style={{
-        padding: 'calc(28px + env(safe-area-inset-bottom)) 24px 28px',
+        marginTop: 28,
+        paddingTop: 26,
+        paddingLeft: 22,
+        paddingRight: 22,
+        paddingBottom: 'calc(26px + env(safe-area-inset-bottom))',
         borderTop: `1px solid ${COLORS.border}`,
         position: 'relative',
+        background: COLORS.bg,
       }}>
         <div style={{
-          position: 'absolute',
-          top: -1,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: COLORS.bg,
-          padding: '0 16px',
+          position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)',
+          background: COLORS.bg, padding: '0 16px',
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            transform: 'translateY(-7px)',
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, transform: 'translateY(-7px)' }}>
             <div style={{ width: 4, height: 4, background: COLORS.accent, transform: 'rotate(45deg)' }} />
             <div style={{ width: 4, height: 4, background: COLORS.accent }} />
             <div style={{ width: 4, height: 4, background: COLORS.accent, transform: 'rotate(45deg)' }} />
           </div>
         </div>
-        <div className="display" style={{
-          textAlign: 'center',
-          fontSize: 12,
-          letterSpacing: '0.35em',
-          marginBottom: 8,
-        }}>
+        <div className="display" style={{ textAlign: 'center', fontSize: 12, letterSpacing: '0.35em', marginBottom: 8 }}>
           PEAKFORM
         </div>
-        <div className="mono" style={{
-          textAlign: 'center',
-          fontSize: 9,
-          letterSpacing: '0.4em',
-          color: COLORS.textMore,
-        }}>
-          ENGINEERED  BY  YUNUS
+        <div className="mono" style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.4em', color: COLORS.textMore }}>
+          ENGINEERED BY YUNUS
         </div>
       </div>
 
