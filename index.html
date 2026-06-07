@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Complete">
+<meta name="apple-mobile-web-app-title" content="PeakForm">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
-<title>Complete Tracker</title>
+<title>PeakForm</title>
 <style>
   html,body{margin:0;padding:0;background:#0A0A0A;-webkit-text-size-adjust:100%;}
   #boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0A0A0A;color:#808080;font-family:-apple-system,sans-serif;}
@@ -31,7 +31,7 @@
 </script>
 </head>
 <body>
-<div id="boot"><div class="mk"></div><div>COMPLETE</div></div>
+<div id="boot"><div class="mk"></div><div style="letter-spacing:0.3em;font-size:13px;">PEAKFORM</div></div>
 <div id="root"></div>
 <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 <script type="text/babel" data-type="module" data-presets="react">
@@ -685,7 +685,7 @@ function App() {
     setScreen('home');
   };
 
-  // ─── COMPLETE SCORE (weekly avg + streak from storage) ──────────
+  // ─── PEAK SCORE (weekly avg + streak from storage) ──────────
   const [scoreData, setScoreData] = useState({ weekAvg: 0, streak: 0, todayTotal: null });
 
   const computeScoreData = async () => {
@@ -875,20 +875,20 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
                 color: COLORS.accent,
                 position: 'relative',
                 zIndex: 1,
-              }}>C</div>
+              }}>P</div>
             </div>
             <div>
               <div className="display" style={{
                 fontSize: 14,
                 letterSpacing: '0.2em',
                 lineHeight: 1,
-              }}>COMPLETE</div>
+              }}>PEAKFORM</div>
               <div className="mono" style={{
                 fontSize: 8,
                 letterSpacing: '0.25em',
                 color: COLORS.textDim,
                 marginTop: 2,
-              }}>TRACKER SYSTEM</div>
+              }}>PERFORMANCE SYSTEM</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -964,7 +964,7 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
             lineHeight: 0.88,
             letterSpacing: '0.005em',
           }}>
-            COMPLETE
+            PEAK
           </div>
           <div style={{
             display: 'flex',
@@ -987,7 +987,7 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
             lineHeight: 0.88,
             letterSpacing: '0.005em',
           }}>
-            TRACKER
+            FORM
           </div>
 
           {/* Flourished tagline */}
@@ -1019,7 +1019,7 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
         </div>
       </div>
 
-      {/* COMPLETE SCORE */}
+      {/* PEAK SCORE */}
       <div style={{ padding: '0 24px', marginBottom: 28 }}>
         <ScoreRing
           score={score.total}
@@ -1153,7 +1153,7 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
           letterSpacing: '0.35em',
           marginBottom: 8,
         }}>
-          COMPLETE TRACKER
+          PEAKFORM
         </div>
         <div className="mono" style={{
           textAlign: 'center',
@@ -1220,7 +1220,7 @@ function ScoreRing({ score, weekAvg, streak, onTap }) {
           justifyContent: 'center',
         }}>
           <div className="mono" style={{ fontSize: 9, letterSpacing: '0.3em', color: COLORS.textDim, marginBottom: 2 }}>
-            COMPLETE SCORE
+            PEAK SCORE
           </div>
           <div className="display" style={{ fontSize: 64, lineHeight: 0.9, color }}>
             {score}
@@ -1317,7 +1317,7 @@ function ScoreBreakdownModal({ score, onClose }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <div className="mono" style={{ fontSize: 9, letterSpacing: '0.25em', color: COLORS.textDim, marginBottom: 4 }}>
-              COMPLETE SCORE
+              PEAK SCORE
             </div>
             <div className="display" style={{ fontSize: 40, lineHeight: 1, color: scoreColor(score.total) }}>
               {score.total}<span style={{ fontSize: 16, color: COLORS.textDim }}>/100</span>

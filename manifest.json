@@ -1,6 +1,6 @@
 {
-  "name": "Complete Tracker",
-  "short_name": "Complete",
+  "name": "PeakForm",
+  "short_name": "PeakForm",
   "description": "Performance & Physique Suite",
   "start_url": "./index.html",
   "scope": "./",
