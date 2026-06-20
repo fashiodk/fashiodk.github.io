@@ -36,9 +36,10 @@
 <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 <script type="text/babel" data-type="module" data-presets="react">
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, TrendingUp, Calendar, Droplet, Pill, Moon, FlaskConical, ChevronLeft, ChevronRight, Plus, Minus, Check, Trophy, Weight, Search, X, Trash2, Home, ArrowRight, Activity, Flame, Play, Timer, Zap, SkipForward, Award, Pause } from 'lucide-react';
+import { Dumbbell, TrendingUp, Calendar, Droplet, Pill, Moon, FlaskConical, ChevronLeft, ChevronRight, Plus, Minus, Check, Trophy, Weight, Search, X, Trash2, Home, ArrowRight, Activity, Flame, Play, Timer, Zap, SkipForward, Award, Pause, User, Lock } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 
+import { createPortal } from 'react-dom';
 
 const LOGO_EMBLEM = 'data:image/png;base64,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';
 
@@ -122,18 +123,80 @@ function getDayName(dateStr) {
 }
 
 // Progressive overload suggestion
-function suggestNextWeight(lastSet, target) {
-  if (!lastSet) return { weight: 0, reps: target, reason: 'Ny øvelse' };
+// Parse an exercise's rep prescription ("8" or "12-15") into {low, high}.
+function parseRepRange(reps, target) {
+  const s = String(reps || '').trim();
+  const m = s.match(/^(\d+)\s*-\s*(\d+)$/);
+  if (m) return { low: parseInt(m[1], 10), high: parseInt(m[2], 10) };
+  const n = parseInt(s, 10);
+  if (!isNaN(n)) return { low: n, high: n };
+  const t = target || 8;
+  return { low: t, high: t };
+}
+
+// Smallest sensible load increment for an exercise.
+// Compounds climb in 2.5kg; isolation work climbs slower (2.5kg is a big % jump
+// on a lateral raise). We base it on load: ~2.5% rounded to 1.25, min 1.25kg.
+function loadIncrement(kg, compound) {
+  if (compound) return 2.5;
+  if (kg <= 0) return 1.25;
+  const pct = kg * 0.025;
+  return Math.max(1.25, Math.round(pct / 1.25) * 1.25);
+}
+
+// Double-progression recommender with an RPE/RIR brake.
+// Philosophy: repeat last performance first, climb reps within the range, and
+// only add load once the top of the range is owned at a comfortable RPE.
+// `exercise` may carry { reps, target, compound }. `historyEntries` (newest-first)
+// is optional and used for plateau / layoff detection.
+function suggestNextWeight(lastSet, target, exercise, historyEntries) {
+  const range = parseRepRange(exercise?.reps, target);
+  const compound = exercise?.compound ?? true;
+
+  if (!lastSet) {
+    return { weight: 0, reps: range.low, reason: 'Ny øvelse — find en vægt med ~2 i reserve' };
+  }
+
   const lastKg = parseFloat(lastSet.kg) || 0;
   const lastReps = parseInt(lastSet.reps) || 0;
-  const lastRPE = lastSet.rpe;
-  if (lastReps >= target && (!lastRPE || lastRPE <= 8)) {
-    return { weight: lastKg + 2.5, reps: target, reason: '+2.5kg progression' };
+  const lastRPE = lastSet.rpe; // 1–10; null if not logged
+  const inc = loadIncrement(lastKg, compound);
+
+  // Layoff guard: if the most recent history entry is >10 days old, ease back in.
+  if (Array.isArray(historyEntries) && historyEntries[0]?.date) {
+    const days = (Date.now() - new Date(historyEntries[0].date).getTime()) / 86400000;
+    if (days > 10) {
+      const eased = Math.max(0, Math.round((lastKg - inc) / 1.25) * 1.25);
+      return { weight: eased, reps: range.low, reason: 'Tilbage efter pause — start let' };
+    }
   }
-  if (lastReps < target) {
-    return { weight: lastKg, reps: target, reason: 'Samme vægt - hit target reps' };
+
+  // RPE brake: if the last set was very hard, repeat it rather than progressing.
+  if (lastRPE && lastRPE >= 9) {
+    return { weight: lastKg, reps: Math.max(lastReps, range.low), reason: 'Hårdt sidst (RPE ' + lastRPE + ') — gentag' };
   }
-  return { weight: lastKg, reps: target, reason: 'Samme vægt - byg op' };
+
+  // Top of range owned at a manageable RPE → add load, reset to bottom of range.
+  if (lastReps >= range.high && (!lastRPE || lastRPE <= 8)) {
+    return { weight: lastKg + inc, reps: range.low, reason: '+' + inc + 'kg — toppede rep-range' };
+  }
+
+  // Inside the range → keep the weight, chase one more rep (double progression).
+  if (lastReps >= range.low) {
+    const nextReps = Math.min(range.high, lastReps + 1);
+    return { weight: lastKg, reps: nextReps, reason: 'Samme vægt — +1 rep mod ' + range.high };
+  }
+
+  // Below the range → plateau check, else hold and rebuild.
+  if (Array.isArray(historyEntries) && historyEntries.length >= 3) {
+    const last3 = historyEntries.slice(0, 3);
+    const stuck = last3.every(h => Math.abs((parseFloat(h.kg) || 0) - lastKg) < 0.01 && (parseInt(h.reps, 10) || 0) < range.low);
+    if (stuck) {
+      const deload = Math.max(0, Math.round((lastKg * 0.9) / 1.25) * 1.25);
+      return { weight: deload, reps: range.low, reason: 'Plateau — deload ~10% og byg op igen' };
+    }
+  }
+  return { weight: lastKg, reps: range.low, reason: 'Samme vægt — ram bunden af rep-range' };
 }
 
 const SUPPLEMENTS = [
@@ -476,6 +539,10 @@ const styles = `
     from { opacity: 0; }
     to { opacity: 1; }
   }
+  @keyframes slideUpSheet {
+    from { transform: translateY(28px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
   .screen-forward { animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .screen-back { animation: slideInLeft 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .screen-fade { animation: fadeIn 0.25s ease-out both; }
@@ -514,7 +581,7 @@ const COLORS = {
 };
 
 function App() {
-  const [screen, setScreen] = useState('home'); // 'home' | 'tracker'
+  const [screen, setScreen] = useState('home'); // 'home' | 'tracker' | 'profile'
   const [screenDirection, setScreenDirection] = useState('forward'); // forward | back | fade
   const [tab, setTab] = useState('today');
   const [date, setDate] = useState(todayKey());
@@ -611,7 +678,14 @@ function App() {
               parseFloat(a.kg) >= parseFloat(b.kg) ? a : b
             );
             if (!newHistory[exId]) newHistory[exId] = [];
-            newHistory[exId].push({ date: dateKey, kg: parseFloat(top.kg), reps: parseInt(top.reps) });
+            // `kg`/`reps` = that day's top set (PR/volume log, back-compatible).
+            // `sets` = the full per-set array of that day, for per-set suggestions.
+            newHistory[exId].push({
+              date: dateKey,
+              kg: parseFloat(top.kg),
+              reps: parseInt(top.reps),
+              sets: completed.map(s => ({ kg: parseFloat(s.kg), reps: parseInt(s.reps), rpe: s.rpe ?? null })),
+            });
           });
         });
         Object.keys(newHistory).forEach(k => {
@@ -702,6 +776,10 @@ function App() {
     setDate(todayKey()); // home always reflects today
     setScreen('home');
   };
+  const goToProfile = () => {
+    setScreenDirection('forward');
+    setScreen('profile');
+  };
 
   // ─── PEAK SCORE (weekly avg + streak from storage) ──────────
   const [scoreData, setScoreData] = useState({ weekAvg: 0, streak: 0, todayTotal: null });
@@ -758,11 +836,16 @@ function App() {
         >
           <HomeScreen
             onEnter={goToTracker}
+            onProfile={goToProfile}
             history={history}
             entry={entry}
             activeSession={activeSession}
             scoreData={scoreData}
           />
+        </div>
+      ) : screen === 'profile' ? (
+        <div key="profile" className={screenDirection === 'forward' ? 'screen-forward' : 'screen-fade'}>
+          <ProfileScreen onBack={goToHome} entry={entry} update={update} reloadHistory={reloadHistory} />
         </div>
       ) : activeSession ? (
         <div key="active" className="screen-forward">
@@ -825,11 +908,12 @@ function CornerTicks({ color, size = 11, inset = 9, weight = 1.5 }) {
 
 function SectionLabel({ text, right, rightColor }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 14 }}>
-      <div className="mono" style={{ fontSize: 9.5, letterSpacing: '0.28em', color: COLORS.textDim, whiteSpace: 'nowrap' }}>{text}</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+      <div style={{ width: 5, height: 15, background: COLORS.accent, flexShrink: 0 }} />
+      <div className="display" style={{ fontSize: 14, letterSpacing: '0.14em', color: COLORS.text, whiteSpace: 'nowrap' }}>{text}</div>
       <div style={{ flex: 1, height: 1, background: COLORS.border }} />
       {right && (
-        <div className="mono" style={{ fontSize: 9, letterSpacing: '0.2em', color: rightColor || COLORS.textMore, whiteSpace: 'nowrap' }}>{right}</div>
+        <div className="mono" style={{ fontSize: 9, letterSpacing: '0.2em', color: rightColor || COLORS.textDim, whiteSpace: 'nowrap' }}>{right}</div>
       )}
     </div>
   );
@@ -878,17 +962,26 @@ function ModuleRow({ num, title, subtitle, icon, active, locked, live, onClick }
           textOverflow: 'ellipsis',
         }}>{subtitle}</div>
       </div>
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', opacity: locked ? 0.5 : 1 }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
         {locked ? (
           <div className="mono" style={{
-            fontSize: 8.5,
+            fontSize: 9,
+            fontWeight: 700,
             letterSpacing: '0.18em',
-            color: COLORS.textMore,
-            border: `1px solid ${COLORS.border}`,
-            padding: '4px 7px',
+            color: COLORS.accent,
+            background: COLORS.accentDim,
+            border: `1px solid ${COLORS.accent}`,
+            padding: '5px 9px',
           }}>SNART</div>
         ) : live ? (
-          <Play size={24} strokeWidth={2.5} fill="#000" color="#000" />
+          <div className="mono" style={{
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: '0.18em',
+            color: COLORS.green,
+            border: `1px solid ${COLORS.green}`,
+            padding: '5px 9px',
+          }}>● LIVE</div>
         ) : (
           <div style={{ color: active ? '#000' : COLORS.text }}>{icon}</div>
         )}
@@ -897,7 +990,7 @@ function ModuleRow({ num, title, subtitle, icon, active, locked, live, onClick }
   );
 }
 
-function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
+function HomeScreen({ onEnter, onProfile, history, entry, activeSession, scoreData }) {
   const [time, setTime] = useState(new Date());
   const [showBreakdown, setShowBreakdown] = useState(false);
 
@@ -906,38 +999,82 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
     return () => clearInterval(id);
   }, []);
 
-  // Today's score computed live from entry
   const score = computeScore(entry);
+  const dimRed = '#8E1813';
 
-  // Stats
+  // ── Backup-påmindelse ──
+  const [lastBackup, setLastBackup] = useState(undefined);
+  useEffect(() => {
+    safeGet('backup:last').then(v => setLastBackup(v || null)).catch(() => setLastBackup(null));
+  }, []);
+  const backupDays = lastBackup ? Math.floor((Date.now() - new Date(lastBackup).getTime()) / 86400000) : null;
+  const backupStale = lastBackup !== undefined && (lastBackup === null || backupDays >= 7);
+
+  // ── Stats fra history ──
   const totalExercises = Object.keys(history).length;
   const allDates = new Set();
   Object.values(history).forEach(arr => arr.forEach(h => allDates.add(h.date)));
   const totalSessions = allDates.size;
-
   let topPR = null;
-  let topPRName = '';
-  Object.entries(history).forEach(([exId, arr]) => {
-    arr.forEach(h => {
-      if (!topPR || h.kg > topPR.kg) {
-        topPR = h;
-        topPRName = exId;
-      }
-    });
+  Object.values(history).forEach(arr => {
+    arr.forEach(h => { if (!topPR || h.kg > topPR.kg) topPR = h; });
   });
 
-  // Time-aware greeting (Danish)
+  // ── Tid & hilsen ──
   const hour = time.getHours();
   const greeting =
     hour < 5 ? 'GOD NAT' :
     hour < 12 ? 'GOD MORGEN' :
     hour < 18 ? 'GOD EFTERMIDDAG' :
     hour < 22 ? 'GOD AFTEN' : 'GOD NAT';
-
   const dayName = time.toLocaleDateString('da-DK', { weekday: 'long' }).toUpperCase();
   const timeStr = time.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
-  const dateNum = time.toLocaleDateString('da-DK', { day: 'numeric', month: 'short' }).toUpperCase();
   const fullDate = time.toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
+  const weekNo = (() => {
+    const d = new Date(time); d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+    const w1 = new Date(d.getFullYear(), 0, 4);
+    return 1 + Math.round(((d - w1) / 86400000 - 3 + ((w1.getDay() + 6) % 7)) / 7);
+  })();
+
+  // ── Dagens plan ──
+  const plannedKey = activeSession ? activeSession.workoutType : WEEK_PLAN[time.getDay()];
+  const plannedProgram = PROGRAM[plannedKey];
+  const isRest = !activeSession && plannedKey === 'rest';
+  const WORKOUT_FOCUS = {
+    upper: 'Bryst · Ryg · Skuldre',
+    lower: 'Ben · Baglår · Lægge',
+    push: 'Bryst · Skuldre · Triceps',
+    pull: 'Ryg · Biceps · Bagskulder',
+    legs: 'Quads · Baglår · Lægge',
+  };
+  const cardTitle = activeSession
+    ? (PROGRAM[activeSession.workoutType]?.name || 'SESSION')
+    : isRest ? 'HVILEDAG' : (plannedProgram?.name || 'TRÆNING');
+  const cardFocus = activeSession
+    ? 'Session i gang · tryk for at fortsætte'
+    : isRest ? 'Restitution · log mad & søvn'
+    : (WORKOUT_FOCUS[plannedKey] || '');
+  const cardCta = activeSession ? 'GENOPTAG' : isRest ? 'ÅBN TRACKER' : 'START SESSION';
+  const titleBig = cardTitle.length <= 6;
+  const scoreCol = scoreColor(score.total);
+  const ringCirc = 2 * Math.PI * 43;
+
+  // ── Dagens status: søjler + fokus-tip ──
+  const pillars = [
+    { label: 'SØVN', val: score.sleep },
+    { label: 'PROTEIN', val: score.protein },
+    { label: 'TRÆNING', val: score.training },
+    { label: 'HYDRATION', val: score.hydration },
+  ];
+  const pillarColor = v => v >= 17.5 ? COLORS.green : v >= 10 ? '#FF4500' : COLORS.red;
+  const lowest = pillars.reduce((a, b) => (b.val < a.val ? b : a), pillars[0]);
+  const statusTip = score.total >= 100 ? 'ALT I MÅL — MAKSIMAL DAG' : ({
+    'SØVN': 'FOKUS: LOG SØVN FOR FLERE POINT',
+    'PROTEIN': `FOKUS: +${Math.max(GOALS.protein - (score.proteinGrams || 0), 0)}G PROTEIN TIL MÅL`,
+    'TRÆNING': isRest ? 'HVILEDAG — TÆLLER FULDT' : 'FOKUS: START DAGENS SESSION',
+    'HYDRATION': 'FOKUS: DRIK VAND · TAG TILSKUD',
+  }[lowest.label]);
 
   return (
     <div style={{
@@ -947,104 +1084,203 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
       overflowX: 'hidden',
       background: COLORS.bg,
     }}>
-      {/* ===== STATUS BAR ===== */}
+      {/* ===== STATUS BAR (brand + profil) ===== */}
       <div className="safe-top" style={{ background: COLORS.bg }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '15px 20px 13px',
+          padding: '13px 20px 11px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
             <img src={LOGO_EMBLEM} alt="" style={{ height: 24, width: 'auto', display: 'block' }} />
             <div className="display" style={{ fontSize: 13, letterSpacing: '0.22em' }}>PEAKFORM</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <div className="pf-blink" style={{ width: 6, height: 6, borderRadius: '50%', background: COLORS.accent }} />
-            <div className="mono" style={{ fontSize: 11, letterSpacing: '0.08em', color: COLORS.textDim }}>{timeStr}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div className="pf-blink" style={{ width: 6, height: 6, borderRadius: '50%', background: COLORS.accent }} />
+              <div className="mono" style={{ fontSize: 11, letterSpacing: '0.08em', color: COLORS.textDim }}>{timeStr}</div>
+            </div>
+            <button onClick={onProfile} className="pf-press" style={{
+              width: 32, height: 32,
+              background: 'transparent',
+              border: `1px solid ${COLORS.border}`,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0,
+            }}>
+              <User size={16} color={COLORS.textDim} />
+            </button>
           </div>
         </div>
         <div style={{ height: 1, background: COLORS.border }} />
       </div>
 
-      {/* ===== HERO ===== */}
-      <div className="pf-grid pf-rise" style={{
-        position: 'relative',
-        overflow: 'hidden',
-        padding: '32px 22px 28px',
-        borderBottom: `1px solid ${COLORS.border}`,
-      }}>
-        <div className="pf-glow" style={{
-          position: 'absolute', top: -100, right: -80, width: 280, height: 280,
-          background: `radial-gradient(circle, ${COLORS.accent}38, transparent 68%)`,
-          pointerEvents: 'none',
-        }} />
-        <img src={LOGO_EMBLEM} alt="" style={{
-          position: 'absolute', right: -30, bottom: -40, width: 210, opacity: 0.05,
-          pointerEvents: 'none', transform: 'rotate(-6deg)',
-        }} />
-        <CornerTicks color={COLORS.accent} size={12} inset={10} />
-
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: 24, position: 'relative',
-        }}>
-          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.3em', color: COLORS.textMore }}>
-            PERFORMANCE&nbsp;OS
-          </div>
-          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: COLORS.textMore }}>
-            v1.0 — {dayName.slice(0, 3)}
-          </div>
-        </div>
-
-        <div style={{
-          fontFamily: "'Archivo', sans-serif",
-          fontWeight: 900,
-          fontStyle: 'italic',
-          fontSize: 'clamp(40px, 13vw, 54px)',
-          lineHeight: 0.88,
-          color: COLORS.accent,
-          letterSpacing: '-0.01em',
-          whiteSpace: 'nowrap',
-          position: 'relative',
-        }}>
-          PEAKFORM
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, position: 'relative' }}>
-          <div style={{ width: 26, height: 2, background: COLORS.accent, flexShrink: 0 }} />
-          <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: COLORS.textDim, whiteSpace: 'nowrap' }}>
-            STRENGTH · PHYSIQUE · RECOVERY
-          </div>
-        </div>
-      </div>
-
-      {/* ===== GREETING ===== */}
-      <div className="pf-rise" style={{ padding: '26px 22px 6px', animationDelay: '0.07s' }}>
-        <div className="mono" style={{ fontSize: 10, letterSpacing: '0.3em', color: COLORS.accent, marginBottom: 10 }}>
+      {/* ===== GREETING (poster) ===== */}
+      <div className="pf-rise" style={{ padding: '22px 22px 4px' }}>
+        <div className="mono" style={{ fontSize: 10, letterSpacing: '0.3em', color: COLORS.textDim, marginBottom: 9 }}>
           — {greeting}
         </div>
-        <div className="display" style={{ fontSize: 48, lineHeight: 0.88, letterSpacing: '0.01em' }}>
-          YUNUS<span style={{ color: COLORS.accent }}>.</span>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
+          <div className="display" style={{ fontSize: 44, lineHeight: 0.88, letterSpacing: '0.02em' }}>
+            GÆST<span style={{ color: COLORS.accent }}>.</span>
+          </div>
+          {scoreData?.streak > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              border: `1px solid ${dimRed}`,
+              padding: '5px 9px',
+              flexShrink: 0,
+            }}>
+              <Flame size={12} color={COLORS.accent} />
+              <span className="mono" style={{ fontSize: 9, letterSpacing: '0.12em', color: COLORS.text }}>
+                {scoreData.streak} {scoreData.streak === 1 ? 'DAG' : 'DAGE'}
+              </span>
+            </div>
+          )}
         </div>
-        <div className="mono" style={{ fontSize: 9.5, color: COLORS.textMore, letterSpacing: '0.14em', marginTop: 12 }}>
+        <button onClick={onProfile} className="pf-press" style={{
+          background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: 8,
+          display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          <span className="mono" style={{ fontSize: 9.5, letterSpacing: '0.14em', color: COLORS.accent }}>
+            OPRET BRUGER ELLER LOG IND ›
+          </span>
+        </button>
+        <div className="mono" style={{ fontSize: 9, color: COLORS.textMore, letterSpacing: '0.14em', marginTop: 10 }}>
           {fullDate.toUpperCase()}
         </div>
       </div>
 
-      {/* ===== PEAK SCORE ===== */}
-      <div className="pf-rise" style={{ padding: '26px 22px 0', animationDelay: '0.14s' }}>
-        <SectionLabel text="DAGENS PEAK SCORE" right="● LIVE" rightColor={COLORS.accent} />
-        <ScoreRing
-          score={score.total}
-          weekAvg={scoreData?.weekAvg || 0}
-          streak={scoreData?.streak || 0}
-          onTap={() => setShowBreakdown(true)}
-        />
+      {/* ===== HERO — dagens session (fritstående poster) ===== */}
+      <div className="pf-rise" style={{ padding: '18px 22px 0', animationDelay: '0.06s' }}>
+        <div className="mono" style={{ fontSize: 9, letterSpacing: '0.24em', color: COLORS.textMore, marginBottom: 10 }}>
+          MODULE 01 · I DAG
+        </div>
+        <div className="display" style={{ fontSize: 17, letterSpacing: '0.06em', color: COLORS.textMore }}>
+          {dayName} <span style={{ color: dimRed }}>·</span> UGE {weekNo}
+        </div>
+        <div className="display" style={{
+          fontSize: titleBig ? 'clamp(56px, 19vw, 74px)' : 'clamp(34px, 12vw, 46px)',
+          lineHeight: 0.88,
+          letterSpacing: '0.01em',
+          marginTop: 6,
+          marginLeft: -2,
+          whiteSpace: 'nowrap',
+        }}>
+          {cardTitle}<span style={{ color: COLORS.accent }}>.</span>
+        </div>
+        <div className="mono" style={{
+          fontSize: 10, letterSpacing: '0.05em', color: COLORS.textDim, marginTop: 10,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {cardFocus}
+        </div>
+        {/* CTA — eneste mættede røde element */}
+        <button onClick={onEnter} className="pf-press" style={{
+          width: '100%',
+          background: COLORS.accent,
+          color: '#000',
+          border: 'none',
+          cursor: 'pointer',
+          padding: '16px 18px',
+          marginTop: 14,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <span className="display" style={{ fontSize: 15, letterSpacing: '0.12em' }}>{cardCta}</span>
+          {activeSession
+            ? <Play size={19} strokeWidth={2.5} fill="#000" color="#000" />
+            : <ArrowRight size={19} strokeWidth={2.8} color="#000" />}
+        </button>
       </div>
 
-      {/* ===== STATS ===== */}
-      <div className="pf-rise" style={{ padding: '28px 22px 0', animationDelay: '0.2s' }}>
+      {/* ===== DAGENS STATUS — firkanten (instrument-panel) ===== */}
+      <div className="pf-rise" style={{ padding: '26px 22px 0', animationDelay: '0.12s' }}>
+        <SectionLabel text="DAGENS STATUS" right={`UGE-SNIT ${scoreData?.weekAvg || 0}`} />
+        <button onClick={() => setShowBreakdown(true)} className="pf-press" style={{
+          width: '100%',
+          textAlign: 'left',
+          border: `1px solid ${COLORS.border}`,
+          background: COLORS.surface,
+          position: 'relative',
+          cursor: 'pointer',
+          padding: '16px 16px 14px',
+          display: 'block',
+        }}>
+          <CornerTicks color={dimRed} size={10} inset={8} weight={1.5} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ position: 'relative', width: 96, height: 96, flexShrink: 0 }}>
+              <svg width="96" height="96" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="48" cy="48" r="43" stroke={COLORS.surfaceLight} strokeWidth="8" fill="none" />
+                <circle cx="48" cy="48" r="43" stroke={scoreCol} strokeWidth="8" fill="none"
+                  strokeDasharray={ringCirc}
+                  strokeDashoffset={ringCirc * (1 - score.total / 100)}
+                  strokeLinecap="round" />
+              </svg>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="display" style={{ fontSize: 33, lineHeight: 0.82, color: scoreCol }}>{score.total}</div>
+                <div className="mono" style={{ fontSize: 8, color: COLORS.textDim, letterSpacing: '0.1em' }}>/ 100</div>
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {pillars.map((p, i) => (
+                <div key={p.label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: i < 3 ? 9 : 0 }}>
+                  <span className="mono" style={{ fontSize: 8, letterSpacing: '0.08em', color: COLORS.textDim, width: 58, flexShrink: 0 }}>
+                    {p.label}
+                  </span>
+                  <div style={{ flex: 1, height: 5, background: COLORS.surfaceLight }}>
+                    <div style={{ width: `${Math.round((p.val / 25) * 100)}%`, height: '100%', background: pillarColor(p.val) }} />
+                  </div>
+                  <span className="mono" style={{ fontSize: 8, color: COLORS.textMore, width: 32, textAlign: 'right', flexShrink: 0 }}>
+                    {p.val}/25
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{
+            marginTop: 14,
+            paddingTop: 12,
+            borderTop: `1px solid ${COLORS.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}>
+            <span className="mono" style={{
+              fontSize: 9, letterSpacing: '0.08em', color: scoreCol,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              ▸ {statusTip}
+            </span>
+            <span className="mono" style={{ fontSize: 8, letterSpacing: '0.1em', color: COLORS.textMore, flexShrink: 0 }}>
+              DETALJER ›
+            </span>
+          </div>
+          {(entry?.mk677?.dose || 0) > 0 && (
+            <div style={{
+              marginTop: 11,
+              paddingTop: 11,
+              borderTop: `1px solid ${COLORS.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <span className="mono" style={{ fontSize: 9, letterSpacing: '0.14em', color: COLORS.textDim, display: 'flex', alignItems: 'center', gap: 7 }}>
+                <FlaskConical size={11} color={COLORS.accent} /> MK-677 PROTOKOL
+              </span>
+              <span className="mono" style={{ fontSize: 9, letterSpacing: '0.1em', color: COLORS.green }}>
+                ● {entry.mk677.dose} MG{entry.mk677.time ? ` · ${entry.mk677.time}` : ''}
+              </span>
+            </div>
+          )}
+        </button>
+      </div>
+
+      {/* ===== OVERSIGT ===== */}
+      <div className="pf-rise" style={{ padding: '28px 22px 0', animationDelay: '0.14s' }}>
         <SectionLabel text="OVERSIGT" right={totalSessions > 0 ? `${totalSessions} SESSIONS` : null} />
         {totalSessions > 0 ? (
           <div style={{
@@ -1080,29 +1316,38 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
                 FØRSTE SESSION VENTER
               </div>
               <div className="mono" style={{ fontSize: 10, color: COLORS.textDim, letterSpacing: '0.04em' }}>
-                Åbn module 01 for at begynde
+                Tryk START ovenfor for at begynde
               </div>
             </div>
           </div>
         )}
+        {backupStale && totalSessions > 0 && (
+          <button onClick={onProfile} className="pf-press" style={{
+            width: '100%',
+            marginTop: 8,
+            background: 'transparent',
+            border: `1px dashed ${dimRed}`,
+            cursor: 'pointer',
+            padding: '9px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+            <span className="mono" style={{ fontSize: 8.5, letterSpacing: '0.12em', color: COLORS.textDim }}>
+              ⚠ BACKUP ANBEFALET — SIDST: {lastBackup ? `${backupDays} DAGE SIDEN` : 'ALDRIG'}
+            </span>
+            <span className="mono" style={{ fontSize: 8.5, letterSpacing: '0.1em', color: COLORS.textMore, flexShrink: 0 }}>EKSPORTÉR ›</span>
+          </button>
+        )}
       </div>
 
-      {/* ===== MODULES ===== */}
-      <div className="pf-rise" style={{ padding: '30px 22px 0', animationDelay: '0.26s' }}>
-        <SectionLabel text="MODULER" right="01 / 03 AKTIV" />
-        <ModuleRow
-          num="01"
-          title={activeSession ? 'GENOPTAG SESSION' : 'WORKOUT TRACKER'}
-          subtitle={activeSession
-            ? `${PROGRAM[activeSession.workoutType]?.name || ''} · TRYK FOR AT FORTSÆTTE`
-            : 'TRAINING · MACROS · SUPPLEMENTS'}
-          icon={<ArrowRight size={24} strokeWidth={2.5} />}
-          active
-          live={!!activeSession}
-          onClick={onEnter}
-        />
+      {/* ===== ALLE MODULER ===== */}
+      <div className="pf-rise" style={{ padding: '30px 22px 0', animationDelay: '0.22s' }}>
+        <SectionLabel text="ALLE MODULER" right="01 – 04" />
+        <ModuleRow num="01" title="TRACKER" subtitle="WORKOUT · MAKROER · SCORE" live onClick={onEnter} />
         <ModuleRow num="02" title="RECOVERY" subtitle="SLEEP · HRV · MOOD" locked />
         <ModuleRow num="03" title="ANALYTICS" subtitle="TRENDS · PREDICTIONS" locked />
+        <ModuleRow num="04" title="SHOP" subtitle="GEAR · SUPPLEMENTS · MERCH" locked />
       </div>
 
       <div style={{ flex: 1, minHeight: 36 }} />
@@ -1128,17 +1373,586 @@ function HomeScreen({ onEnter, history, entry, activeSession, scoreData }) {
             <div style={{ width: 4, height: 4, background: COLORS.accent, transform: 'rotate(45deg)' }} />
           </div>
         </div>
-        <div className="display" style={{ textAlign: 'center', fontSize: 12, letterSpacing: '0.35em', marginBottom: 8 }}>
+        <div className="display" style={{ textAlign: 'center', fontSize: 12, letterSpacing: '0.35em', marginBottom: 10 }}>
           PEAKFORM
         </div>
-        <div className="mono" style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.4em', color: COLORS.textMore }}>
-          ENGINEERED BY YUNUS
+        <div style={{
+          textAlign: 'center',
+          fontFamily: "'Archivo', sans-serif",
+          fontWeight: 900,
+          fontStyle: 'italic',
+          fontSize: 17,
+          letterSpacing: '0.1em',
+          color: COLORS.text,
+        }}>
+          ENGINEER BY <span style={{ color: COLORS.accent, textTransform: 'lowercase' }}>.milligram</span>
+        </div>
+        <div className="mono" style={{ textAlign: 'center', fontSize: 8, letterSpacing: '0.22em', color: COLORS.textMore, marginTop: 7 }}>
+          BUILD 2026.06.19 · 17:04
         </div>
       </div>
 
       {showBreakdown && (
         <ScoreBreakdownModal score={score} onClose={() => setShowBreakdown(false)} />
       )}
+    </div>
+  );
+}
+
+function MK677Section({ entry, update }) {
+  const dimRed = '#8E1813';
+  const mk = entry?.mk677 || { dose: 0, time: '', sideEffects: {} };
+  const EFFECTS = [
+    { k: 'hunger', label: 'SULT' },
+    { k: 'water', label: 'VANDRETENTION' },
+    { k: 'fatigue', label: 'TRÆTHED' },
+    { k: 'sleep', label: 'SØVNKVALITET' },
+    { k: 'tingling', label: 'TINGLING / NUMBNESS' },
+  ];
+  return (
+    <div style={{ border: `1px solid ${COLORS.border}`, background: COLORS.bg, position: 'relative' }}>
+      <CornerTicks color={dimRed} size={8} inset={5} weight={1.5} />
+
+      {/* header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 14px', borderBottom: `1px solid ${COLORS.border}`,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <FlaskConical size={14} color={COLORS.accent} />
+          <span className="display" style={{ fontSize: 14, letterSpacing: '0.1em' }}>MK-677 PROTOKOL</span>
+        </div>
+        <span className="mono" style={{
+          fontSize: 8, letterSpacing: '0.16em',
+          color: mk.dose > 0 ? COLORS.green : COLORS.textMore,
+        }}>
+          {mk.dose > 0 ? '● LOGGET' : '○ IKKE LOGGET'}
+        </span>
+      </div>
+
+      {/* dosis + tidspunkt */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '14px 14px 0' }}>
+        <div>
+          <div className="mono" style={{ fontSize: 8, letterSpacing: '0.2em', color: COLORS.textDim, marginBottom: 7 }}>
+            DOSIS
+          </div>
+          <div style={{ display: 'flex', alignItems: 'stretch', border: `1px solid ${COLORS.border}`, background: COLORS.surfaceLight }}>
+            <button onClick={() => update('mk677.dose', Math.max((mk.dose || 0) - 5, 0))} className="pf-press" style={{
+              width: 36, background: 'transparent', border: 'none',
+              borderRight: `1px solid ${COLORS.border}`,
+              color: COLORS.textDim, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '11px 0',
+            }}>
+              <Minus size={14} />
+            </button>
+            <div style={{ flex: 1, textAlign: 'center', alignSelf: 'center' }}>
+              <span className="display" style={{ fontSize: 20 }}>{mk.dose || 0}</span>
+              <span className="mono" style={{ fontSize: 9, color: COLORS.textDim, marginLeft: 3 }}>MG</span>
+            </div>
+            <button onClick={() => update('mk677.dose', (mk.dose || 0) + 5)} className="pf-press" style={{
+              width: 36, background: 'transparent', border: 'none',
+              borderLeft: `1px solid ${COLORS.border}`,
+              color: COLORS.textDim, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '11px 0',
+            }}>
+              <Plus size={14} />
+            </button>
+          </div>
+        </div>
+        <div>
+          <div className="mono" style={{ fontSize: 8, letterSpacing: '0.2em', color: COLORS.textDim, marginBottom: 7 }}>
+            TIDSPUNKT
+          </div>
+          <input
+            type="time"
+            value={mk.time || ''}
+            onChange={e => update('mk677.time', e.target.value)}
+            className="mono"
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              background: COLORS.surfaceLight,
+              border: `1px solid ${COLORS.border}`,
+              color: COLORS.text,
+              fontSize: 16,
+              padding: '10px 8px',
+              outline: 'none',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* bivirkninger */}
+      <div style={{ padding: '16px 14px 14px' }}>
+        <div className="mono" style={{ fontSize: 8, letterSpacing: '0.2em', color: COLORS.textDim, marginBottom: 10 }}>
+          BIVIRKNINGER · 0–10
+        </div>
+        {EFFECTS.map(e => {
+          const v = mk.sideEffects?.[e.k] || 0;
+          return (
+            <div key={e.k} style={{ marginBottom: 11 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                <span className="mono" style={{ fontSize: 9, letterSpacing: '0.1em', color: COLORS.textDim }}>{e.label}</span>
+                <span className="mono" style={{ fontSize: 9, color: v > 0 ? COLORS.text : COLORS.textMore }}>{v}/10</span>
+              </div>
+              <div style={{ display: 'flex', gap: 3 }}>
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => update(`mk677.sideEffects.${e.k}`, v === i + 1 ? 0 : i + 1)}
+                    className="pf-press"
+                    style={{
+                      flex: 1, height: 18,
+                      background: i < v ? COLORS.accent : COLORS.surfaceLight,
+                      border: 'none', cursor: 'pointer', padding: 0,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <div className="mono" style={{ fontSize: 8, letterSpacing: '0.08em', color: COLORS.textMore, marginTop: 2 }}>
+          TRYK PÅ SAMME NIVEAU IGEN FOR AT NULSTILLE
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Lists stored daily sessions and lets the user delete junk/test entries.
+// Reads entry:YYYY-MM-DD keys directly; calls reloadHistory() after a delete
+// so the per-set "Sidst"/PR references update immediately.
+function SessionManager({ reloadHistory }) {
+  const [sessions, setSessions] = useState(null); // null = loading
+  const [confirmDate, setConfirmDate] = useState(null);
+
+  const load = async () => {
+    const keys = await safeList('entry:');
+    const rows = [];
+    for (const k of keys) {
+      const v = await safeGet(k);
+      if (!v) continue;
+      let data;
+      try { data = JSON.parse(v); } catch { continue; }
+      const exMap = data.workout?.exercises || {};
+      let setCount = 0;
+      Object.values(exMap).forEach(arr => {
+        if (Array.isArray(arr)) setCount += arr.filter(s => s && s.kg && s.reps).length;
+      });
+      // Skip completely empty days (no logged sets, no weight, no macros)
+      const hasAny = setCount > 0 || data.weight || (data.macros && data.macros.protein);
+      if (!hasAny) continue;
+      rows.push({
+        date: k.replace('entry:', ''),
+        type: data.workoutType ? (PROGRAM[data.workoutType]?.name || data.workoutType) : null,
+        setCount,
+      });
+    }
+    rows.sort((a, b) => b.date.localeCompare(a.date)); // newest first
+    setSessions(rows);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const doDelete = async (date) => {
+    await safeDelete('entry:' + date);
+    setConfirmDate(null);
+    await load();
+    if (reloadHistory) await reloadHistory();
+  };
+
+  if (sessions === null) {
+    return <div className="mono" style={{ fontSize: 10, color: COLORS.textDim, padding: '10px 2px' }}>INDLÆSER…</div>;
+  }
+  if (sessions.length === 0) {
+    return <div className="mono" style={{ fontSize: 10, color: COLORS.textDim, padding: '10px 2px' }}>INGEN GEMTE SESSIONER ENDNU</div>;
+  }
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div className="mono" style={{ fontSize: 8, letterSpacing: '0.14em', color: COLORS.textMore, marginBottom: 8 }}>
+        {sessions.length} SESSION{sessions.length === 1 ? '' : 'ER'} · TRYK FOR AT SLETTE TESTDATA
+      </div>
+      {sessions.map(s => (
+        <div key={s.date} style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '9px 4px',
+          borderBottom: `1px solid ${COLORS.border}`,
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="mono" style={{ fontSize: 11, color: COLORS.text, letterSpacing: '0.04em' }}>{formatDate(s.date)}</div>
+            <div className="mono" style={{ fontSize: 9, color: COLORS.textDim, marginTop: 2 }}>
+              {s.type || 'INGEN ØVELSE'}{s.setCount ? ` · ${s.setCount} sæt` : ''}
+            </div>
+          </div>
+          {confirmDate === s.date ? (
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={() => doDelete(s.date)} className="pf-press" style={{
+                background: COLORS.accent, color: '#000', border: 'none', cursor: 'pointer', padding: '6px 10px',
+              }}>
+                <span className="mono" style={{ fontSize: 9, letterSpacing: '0.12em' }}>SLET</span>
+              </button>
+              <button onClick={() => setConfirmDate(null)} className="pf-press" style={{
+                background: 'transparent', color: COLORS.textDim, border: `1px solid ${COLORS.border}`, cursor: 'pointer', padding: '6px 10px',
+              }}>
+                <span className="mono" style={{ fontSize: 9, letterSpacing: '0.12em' }}>FORTRYD</span>
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setConfirmDate(s.date)} className="pf-press" style={{
+              background: 'transparent', border: `1px solid ${COLORS.border}`, cursor: 'pointer', padding: '6px 9px', flexShrink: 0,
+            }}>
+              <Trash2 size={13} color={COLORS.textDim} />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProfileScreen({ onBack, entry, update, reloadHistory }) {
+  const dimRed = '#8E1813';
+  const [loginNote, setLoginNote] = useState(false);
+  const [showBackup, setShowBackup] = useState(false);
+  const [showSessions, setShowSessions] = useState(false);
+  const [privOpen, setPrivOpen] = useState(false);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+
+  const onPinChange = raw => {
+    const v = raw.replace(/\D/g, '').slice(0, 4);
+    setPin(v);
+    setPinError(false);
+    if (v.length === 4) {
+      if (v === '1234') {
+        setUnlocked(true);
+        setPin('');
+      } else {
+        setPinError(true);
+        setPin('');
+      }
+    }
+  };
+
+  const lock = () => {
+    setUnlocked(false);
+    setPrivOpen(false);
+    setPin('');
+    setPinError(false);
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowX: 'hidden',
+      background: COLORS.bg,
+    }}>
+      {/* ===== TOP BAR ===== */}
+      <div className="safe-top" style={{ background: COLORS.bg }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '13px 20px 11px',
+        }}>
+          <button onClick={onBack} className="pf-press" style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            background: 'transparent',
+            border: `1px solid ${COLORS.border}`,
+            cursor: 'pointer',
+            padding: '6px 10px 6px 6px',
+          }}>
+            <ChevronLeft size={15} color={COLORS.textDim} />
+            <span className="mono" style={{ fontSize: 10, letterSpacing: '0.14em', color: COLORS.textDim }}>HJEM</span>
+          </button>
+          <div className="mono" style={{ fontSize: 10, letterSpacing: '0.28em', color: COLORS.textDim }}>PROFIL</div>
+        </div>
+        <div style={{ height: 1, background: COLORS.border }} />
+      </div>
+
+      {/* ===== TITEL ===== */}
+      <div className="pf-rise" style={{ padding: '22px 22px 0' }}>
+        <div className="display" style={{ fontSize: 44, lineHeight: 0.88, letterSpacing: '0.02em' }}>
+          PROFIL<span style={{ color: COLORS.accent }}>.</span>
+        </div>
+      </div>
+
+      {/* ===== GÆST-KORT ===== */}
+      <div className="pf-rise" style={{ padding: '18px 22px 0', animationDelay: '0.06s' }}>
+        <div style={{
+          border: `1px solid ${COLORS.border}`,
+          background: COLORS.surface,
+          position: 'relative',
+          padding: '18px 16px',
+        }}>
+          <CornerTicks color={dimRed} size={10} inset={8} weight={1.5} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{
+              width: 52, height: 52,
+              border: `1px solid ${COLORS.border}`,
+              background: COLORS.surfaceLight,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <User size={24} color={COLORS.textDim} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div className="display" style={{ fontSize: 22, letterSpacing: '0.04em' }}>
+                GÆST<span style={{ color: COLORS.accent }}>.</span>
+              </div>
+              <div className="mono" style={{ fontSize: 9, letterSpacing: '0.14em', color: COLORS.textDim, marginTop: 4 }}>
+                IKKE LOGGET IND
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 16 }}>
+            <button onClick={() => setLoginNote(true)} className="pf-press" style={{
+              background: 'transparent',
+              border: `1px solid ${COLORS.accent}`,
+              color: COLORS.accent,
+              cursor: 'pointer',
+              padding: '11px 8px',
+            }}>
+              <span className="display" style={{ fontSize: 12, letterSpacing: '0.12em' }}>LOG IND</span>
+            </button>
+            <button onClick={() => setLoginNote(true)} className="pf-press" style={{
+              background: 'transparent',
+              border: `1px solid ${COLORS.border}`,
+              color: COLORS.text,
+              cursor: 'pointer',
+              padding: '11px 8px',
+            }}>
+              <span className="display" style={{ fontSize: 12, letterSpacing: '0.12em' }}>OPRET BRUGER</span>
+            </button>
+          </div>
+          {loginNote && (
+            <div className="mono" style={{
+              fontSize: 9.5, letterSpacing: '0.06em', color: COLORS.textDim,
+              marginTop: 12, lineHeight: 1.5,
+            }}>
+              LOGIN-SYSTEM KOMMER SNART — DU FORTSÆTTER SOM GÆST. AL DATA GEMMES LOKALT PÅ TELEFONEN.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== KONTO ===== */}
+      <div className="pf-rise" style={{ padding: '28px 22px 0', animationDelay: '0.14s' }}>
+        <SectionLabel text="KONTO" />
+        <div style={{ border: `1px solid ${COLORS.border}`, background: COLORS.surface }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '13px 14px', borderBottom: `1px solid ${COLORS.border}`,
+          }}>
+            <span className="display" style={{ fontSize: 13, letterSpacing: '0.1em', color: COLORS.textDim }}>NAVN & MÅL</span>
+            <span className="mono" style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              color: COLORS.accent,
+              background: COLORS.accentDim,
+              border: `1px solid ${COLORS.accent}`,
+              padding: '4px 8px',
+            }}>SNART</span>
+          </div>
+          <button onClick={() => setShowBackup(!showBackup)} className="pf-press" style={{
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '13px 14px',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+          }}>
+            <span className="display" style={{ fontSize: 13, letterSpacing: '0.1em', color: COLORS.text }}>BACKUP & EXPORT</span>
+            <span className="mono" style={{ fontSize: 9, letterSpacing: '0.16em', color: COLORS.textDim }}>{showBackup ? 'LUK ›' : 'ÅBN ›'}</span>
+          </button>
+          {showBackup && (
+            <div style={{ padding: '4px 12px 0', borderTop: `1px solid ${COLORS.border}` }}>
+              <div style={{ marginTop: 12 }}>
+                <BackupSection />
+              </div>
+            </div>
+          )}
+          <button onClick={() => setShowSessions(!showSessions)} className="pf-press" style={{
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '13px 14px',
+            background: 'transparent',
+            border: 'none',
+            borderTop: `1px solid ${COLORS.border}`,
+            cursor: 'pointer',
+          }}>
+            <span className="display" style={{ fontSize: 13, letterSpacing: '0.1em', color: COLORS.text }}>TRÆNINGSHISTORIK</span>
+            <span className="mono" style={{ fontSize: 9, letterSpacing: '0.16em', color: COLORS.textDim }}>{showSessions ? 'LUK ›' : 'ÅBN ›'}</span>
+          </button>
+          {showSessions && (
+            <div style={{ padding: '4px 12px 12px', borderTop: `1px solid ${COLORS.border}` }}>
+              <SessionManager reloadHistory={reloadHistory} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== PRIVAT ===== */}
+      <div className="pf-rise" style={{ padding: '28px 22px 0', animationDelay: '0.22s' }}>
+        <SectionLabel
+          text="PRIVAT"
+          right={unlocked ? '● ÅBEN' : '● LÅST'}
+          rightColor={unlocked ? COLORS.green : dimRed}
+        />
+        <div style={{
+          border: `1px solid ${unlocked ? dimRed : COLORS.border}`,
+          background: COLORS.surface,
+          position: 'relative',
+        }}>
+          <CornerTicks color={unlocked ? COLORS.accent : dimRed} size={10} inset={7} weight={1.5} />
+
+          {!unlocked && !privOpen && (
+            <button onClick={() => setPrivOpen(true)} className="pf-press" style={{
+              width: '100%',
+              display: 'flex', alignItems: 'center', gap: 14,
+              background: 'transparent',
+              border: 'none',
+              textAlign: 'left',
+              cursor: 'pointer',
+              padding: '16px 14px',
+            }}>
+              <div style={{
+                width: 42, height: 42,
+                border: `1px solid ${dimRed}`,
+                background: COLORS.surfaceLight,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Lock size={17} color={COLORS.textDim} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="display" style={{ fontSize: 16, letterSpacing: '0.1em' }}>PRIVAT</div>
+                <div className="mono" style={{ fontSize: 8, letterSpacing: '0.16em', color: COLORS.textMore, marginTop: 4 }}>
+                  KODE PÅKRÆVET · MK-677 PROTOKOL
+                </div>
+              </div>
+              <span className="mono" style={{ fontSize: 9, letterSpacing: '0.16em', color: COLORS.textDim, flexShrink: 0 }}>ÅBN ›</span>
+            </button>
+          )}
+
+          {!unlocked && privOpen && (
+            <div style={{ padding: '22px 16px 18px', textAlign: 'center' }}>
+              <div style={{
+                width: 44, height: 44,
+                border: `1px solid ${dimRed}`,
+                background: COLORS.surfaceLight,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 12px',
+              }}>
+                <Lock size={18} color={COLORS.accent} />
+              </div>
+              <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', color: COLORS.textDim, marginBottom: 14 }}>
+                INDTAST 4-CIFRET KODE
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 14 }}>
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} style={{
+                    width: 12, height: 12,
+                    border: `1px solid ${pinError ? COLORS.red : COLORS.border}`,
+                    background: i < pin.length ? (pinError ? COLORS.red : COLORS.accent) : 'transparent',
+                  }} />
+                ))}
+              </div>
+              <input
+                type="password"
+                inputMode="numeric"
+                autoFocus
+                maxLength={4}
+                value={pin}
+                onChange={e => onPinChange(e.target.value)}
+                placeholder="····"
+                className="mono"
+                style={{
+                  width: 150,
+                  boxSizing: 'border-box',
+                  background: COLORS.surfaceLight,
+                  border: `1px solid ${pinError ? COLORS.red : COLORS.border}`,
+                  color: COLORS.text,
+                  fontSize: 20,
+                  letterSpacing: '0.5em',
+                  textAlign: 'center',
+                  padding: '11px 8px',
+                  outline: 'none',
+                }}
+              />
+              {pinError && (
+                <div className="mono" style={{ fontSize: 9, letterSpacing: '0.14em', color: COLORS.red, marginTop: 10 }}>
+                  FORKERT KODE — PRØV IGEN
+                </div>
+              )}
+              <div style={{ marginTop: 14 }}>
+                <button onClick={() => { setPrivOpen(false); setPin(''); setPinError(false); }} className="pf-press" style={{
+                  background: 'transparent',
+                  border: `1px solid ${COLORS.border}`,
+                  color: COLORS.textDim,
+                  cursor: 'pointer',
+                  padding: '8px 18px',
+                }}>
+                  <span className="mono" style={{ fontSize: 9, letterSpacing: '0.16em' }}>ANNULLER</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {unlocked && (
+            <div>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 14px',
+                borderBottom: `1px solid ${COLORS.border}`,
+              }}>
+                <span className="mono" style={{ fontSize: 9, letterSpacing: '0.16em', color: COLORS.green }}>
+                  ● ADGANG GIVET
+                </span>
+                <button onClick={lock} className="pf-press" style={{
+                  background: 'transparent',
+                  border: `1px solid ${COLORS.border}`,
+                  color: COLORS.textDim,
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                }}>
+                  <span className="mono" style={{ fontSize: 9, letterSpacing: '0.16em' }}>LÅS ›</span>
+                </button>
+              </div>
+              <div style={{ padding: '12px 12px 12px' }}>
+                <MK677Section entry={entry} update={update} />
+                <div className="mono" style={{
+                  fontSize: 8, letterSpacing: '0.1em', color: COLORS.textMore,
+                  marginTop: 10, textAlign: 'center',
+                }}>
+                  PRIVAT DATA GEMMES KUN LOKALT PÅ TELEFONEN
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ flex: 1, minHeight: 36 }} />
+
+      {/* ===== FOOTER ===== */}
+      <div style={{
+        marginTop: 28,
+        paddingTop: 24,
+        paddingBottom: 'calc(24px + env(safe-area-inset-bottom))',
+        borderTop: `1px solid ${COLORS.border}`,
+        textAlign: 'center',
+      }}>
+        <div className="mono" style={{ fontSize: 9, letterSpacing: '0.4em', color: COLORS.textMore }}>
+          PEAKFORM · PROFIL
+        </div>
+      </div>
     </div>
   );
 }
@@ -1472,9 +2286,52 @@ const iconBtn = {
   justifyContent: 'center',
 };
 
+// Instrument-panel row used inside the full-screen SKIFT TRÆNING menu.
+function WorkoutMenuRow({ t, selected, planned, onPick }) {
+  const prog = PROGRAM[t];
+  if (!prog) return null;
+  return (
+    <button
+      onClick={onPick}
+      className="pf-press"
+      style={{
+        width: '100%', textAlign: 'left', cursor: 'pointer',
+        background: selected ? COLORS.surfaceLight : COLORS.surface,
+        border: `1px solid ${selected ? COLORS.accent : COLORS.border}`,
+        borderLeft: `3px solid ${selected ? COLORS.accent : (planned ? COLORS.accent : COLORS.border)}`,
+        padding: '16px 16px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="display" style={{ fontSize: 20, letterSpacing: '0.06em', color: COLORS.text }}>
+            {prog.name}
+          </span>
+          {planned && <span style={{ fontSize: 12, color: COLORS.accent }}>★</span>}
+        </div>
+        <span className="mono" style={{ fontSize: 9, letterSpacing: '0.1em', color: COLORS.textDim }}>
+          {prog.exercises.length} ØVELSER · {(prog.subtitle || '').toUpperCase()}
+        </span>
+      </div>
+      <ArrowRight size={18} color={selected ? COLORS.accent : COLORS.textDim} />
+    </button>
+  );
+}
+
 function TodayTab({ entry, update, history, foodCatalog, updateCatalog, onStartSession, date }) {
   const workoutTypes = ['upper', 'lower', 'push', 'pull', 'legs', 'rest'];
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [workoutPickerOpen, setWorkoutPickerOpen] = useState(false);
+  // which workout's manual logging is open INSIDE the menu (null = workout list view)
+  const [loggingWorkout, setLoggingWorkout] = useState(null);
+  const closeWorkoutMenu = () => { setWorkoutPickerOpen(false); setLoggingWorkout(null); };
+  useEffect(() => {
+    if (!workoutPickerOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') { if (loggingWorkout) setLoggingWorkout(null); else setWorkoutPickerOpen(false); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [workoutPickerOpen, loggingWorkout]);
 
   const plannedToday = getPlannedWorkout(date);
   const dayName = getDayName(date);
@@ -1630,41 +2487,31 @@ function TodayTab({ entry, update, history, foodCatalog, updateCatalog, onStartS
         </div>
       )}
 
-      {/* Workout Type Selector */}
-      <Section title={plannedProgram && entry.workoutType !== plannedToday ? "VÆLG ANDEN TRÆNING" : "SKIFT TRÆNING"}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-          {workoutTypes.map(t => (
-            <button
-              key={t}
-              onClick={() => update('workoutType', entry.workoutType === t ? null : t)}
-              className="display"
-              style={{
-                background: entry.workoutType === t ? COLORS.accent : COLORS.surface,
-                color: entry.workoutType === t ? '#000' : COLORS.text,
-                border: `1px solid ${entry.workoutType === t ? COLORS.accent : COLORS.border}`,
-                padding: '14px 8px',
-                fontSize: 16,
-                letterSpacing: '0.08em',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-                position: 'relative',
-              }}
-            >
-              {t === 'rest' ? 'HVILE' : t.toUpperCase()}
-              {t === plannedToday && (
-                <div style={{
-                  position: 'absolute',
-                  top: 3,
-                  right: 5,
-                  fontSize: 9,
-                  fontFamily: 'JetBrains Mono, monospace',
-                  color: entry.workoutType === t ? '#000' : COLORS.accent,
-                  opacity: 0.8,
-                }}>★</div>
-              )}
-            </button>
-          ))}
-        </div>
+      {/* Workout Type Selector — compact trigger, opens modal */}
+      <Section title="SKIFT TRÆNING">
+        <button
+          onClick={() => setWorkoutPickerOpen(true)}
+          className="pf-press"
+          style={{
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: COLORS.surface,
+            border: `1px solid ${COLORS.border}`,
+            borderLeft: `3px solid ${COLORS.accent}`,
+            padding: '14px 16px',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3 }}>
+            <span className="mono" style={{ fontSize: 8, letterSpacing: '0.16em', color: COLORS.textDim }}>VALGT TRÆNING</span>
+            <span className="display" style={{ fontSize: 18, letterSpacing: '0.06em', color: entry.workoutType ? COLORS.text : COLORS.textMore }}>
+              {entry.workoutType ? (entry.workoutType === 'rest' ? 'HVILE' : PROGRAM[entry.workoutType]?.name || entry.workoutType.toUpperCase()) : 'INGEN VALGT'}
+            </span>
+          </div>
+          <span className="mono" style={{ fontSize: 9, letterSpacing: '0.14em', color: COLORS.accent, display: 'flex', alignItems: 'center', gap: 5 }}>
+            SKIFT <ArrowRight size={14} />
+          </span>
+        </button>
       </Section>
 
       {/* Workout Logging */}
@@ -1705,20 +2552,9 @@ function TodayTab({ entry, update, history, foodCatalog, updateCatalog, onStartS
             </div>
           </Section>
 
-          <Section title={`${PROGRAM[entry.workoutType].name} · MANUEL`}>
-            {PROGRAM[entry.workoutType].exercises.map(ex => (
-              <ExerciseBlock
-                key={ex.id}
-                exercise={ex}
-                sets={entry.workout.exercises[ex.id] || []}
-                history={history[ex.id] || []}
-                onChange={(sets) => {
-                  const newExercises = { ...entry.workout.exercises, [ex.id]: sets };
-                  update('workout.exercises', newExercises);
-                }}
-              />
-            ))}
-          </Section>
+          <div style={{ fontSize: 11, color: COLORS.textDim, marginTop: 10, textAlign: 'center' }}>
+            Manuel logning ligger nu i SKIFT TRÆNING-menuen
+          </div>
         </>
       )}
 
@@ -1803,6 +2639,154 @@ function TodayTab({ entry, update, history, foodCatalog, updateCatalog, onStartS
         />
       )}
 
+      {workoutPickerOpen && createPortal(
+        <div
+          onClick={closeWorkoutMenu}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9000,
+            background: 'rgba(0,0,0,0.9)',
+            display: 'flex', flexDirection: 'column',
+            animation: 'fadeIn 0.2s ease-out both',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="safe-top safe-bottom"
+            style={{
+              width: '100%', maxWidth: 480, margin: '0 auto',
+              height: '100%',
+              background: COLORS.bg,
+              borderTop: `2px solid ${COLORS.accent}`,
+              display: 'flex', flexDirection: 'column',
+              animation: 'slideUpSheet 0.32s cubic-bezier(0.22,1,0.36,1) both',
+              overflow: 'hidden',
+            }}
+          >
+            {/* HEADER — instrument-panel style */}
+            <div style={{
+              display: 'flex', alignItems: 'stretch', justifyContent: 'space-between',
+              padding: '16px 16px 14px', borderBottom: `1px solid ${COLORS.border}`,
+              flexShrink: 0, position: 'relative',
+            }}>
+              <div style={{ position: 'absolute', left: 0, top: 16, bottom: 14, width: 4, background: COLORS.accent }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingLeft: 14, minWidth: 0 }}>
+                {loggingWorkout && (
+                  <button
+                    onClick={() => setLoggingWorkout(null)}
+                    className="pf-press"
+                    style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, color: COLORS.text, cursor: 'pointer', padding: '10px 11px', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}
+                  >
+                    <ChevronLeft size={16} />
+                    <span className="mono" style={{ fontSize: 9, letterSpacing: '0.14em' }}>TILBAGE</span>
+                  </button>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+                  <span className="mono" style={{ fontSize: 8, letterSpacing: '0.22em', color: COLORS.accent }}>
+                    {loggingWorkout
+                      ? `LOG · ${(PROGRAM[loggingWorkout]?.subtitle || '').toUpperCase()}`
+                      : 'TRÆNINGSVÆLGER'}
+                  </span>
+                  <span className="display" style={{ fontSize: 24, letterSpacing: '0.04em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {loggingWorkout ? (PROGRAM[loggingWorkout]?.name || 'TRÆNING') : 'VÆLG TRÆNING'}
+                  </span>
+                </div>
+              </div>
+              <button onClick={closeWorkoutMenu} className="pf-press" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: COLORS.textDim, padding: 4, alignSelf: 'flex-start', flexShrink: 0 }}>
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* BODY (scrolls) */}
+            <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '14px 18px 28px' }}>
+              {!loggingWorkout ? (
+                <>
+                  {/* TODAY'S PLAN — pinned */}
+                  {plannedToday && plannedToday !== 'rest' && PROGRAM[plannedToday] && (
+                    <div style={{ marginBottom: 18 }}>
+                      <div className="mono" style={{ fontSize: 8, letterSpacing: '0.18em', color: COLORS.accent, marginBottom: 8 }}>DAGENS PLAN ★</div>
+                      <WorkoutMenuRow
+                        t={plannedToday}
+                        selected={entry.workoutType === plannedToday}
+                        planned={true}
+                        onPick={() => { update('workoutType', plannedToday); setLoggingWorkout(plannedToday); }}
+                      />
+                    </div>
+                  )}
+                  <div className="mono" style={{ fontSize: 8, letterSpacing: '0.18em', color: COLORS.textDim, marginBottom: 8 }}>
+                    {plannedToday && plannedToday !== 'rest' ? 'ØVRIGE TRÆNINGER' : 'ALLE TRÆNINGER'}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {['upper', 'lower', 'push', 'pull', 'legs'].filter(t => t !== plannedToday).map(t => (
+                      <WorkoutMenuRow
+                        key={t}
+                        t={t}
+                        selected={entry.workoutType === t}
+                        planned={false}
+                        onPick={() => { update('workoutType', t); setLoggingWorkout(t); }}
+                      />
+                    ))}
+                  </div>
+                  {/* HVILE — distinct */}
+                  <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }}>
+                    <button
+                      onClick={() => { update('workoutType', 'rest'); closeWorkoutMenu(); }}
+                      className="pf-press"
+                      style={{
+                        width: '100%', textAlign: 'left',
+                        background: entry.workoutType === 'rest' ? COLORS.surfaceLight : 'transparent',
+                        border: `1px dashed ${COLORS.border}`,
+                        padding: '14px 16px', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      }}
+                    >
+                      <span className="display" style={{ fontSize: 16, letterSpacing: '0.06em', color: COLORS.textDim }}>HVILE</span>
+                      <span className="mono" style={{ fontSize: 8, letterSpacing: '0.12em', color: COLORS.textMore }}>INGEN TRÆNING</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* START LIVE SESSION inside menu */}
+                  <button
+                    onClick={() => { closeWorkoutMenu(); onStartSession && onStartSession(loggingWorkout); }}
+                    className="pf-press"
+                    style={{
+                      width: '100%', background: COLORS.accent, color: '#000', border: 'none',
+                      padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      cursor: 'pointer', textAlign: 'left', marginBottom: 16,
+                    }}
+                  >
+                    <div>
+                      <div className="mono" style={{ fontSize: 9, letterSpacing: '0.22em', opacity: 0.7, marginBottom: 3 }}>GUIDET TRÆNING</div>
+                      <div className="display" style={{ fontSize: 17, letterSpacing: '0.08em', lineHeight: 1 }}>START LIVE SESSION</div>
+                    </div>
+                    <Play size={24} strokeWidth={2.5} fill="#000" />
+                  </button>
+                  <div className="display" style={{ fontSize: 11, letterSpacing: '0.15em', color: COLORS.textDim, marginBottom: 12 }}>
+                    ELLER LOG MANUELT
+                  </div>
+                  {PROGRAM[loggingWorkout].exercises.map(ex => (
+                    <ExerciseBlock
+                      key={ex.id}
+                      exercise={ex}
+                      sets={entry.workout.exercises[ex.id] || []}
+                      history={history[ex.id] || []}
+                      currentDate={date}
+                      workoutName={PROGRAM[loggingWorkout].name}
+                      onChange={(sets) => {
+                        const newExercises = { ...entry.workout.exercises, [ex.id]: sets };
+                        update('workout.exercises', newExercises);
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Water */}
       <Section title="VAND" icon={<Droplet size={14} />}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -1865,23 +2849,6 @@ function TodayTab({ entry, update, history, foodCatalog, updateCatalog, onStartS
         ))}
       </Section>
 
-      {/* MK-677 */}
-      <Section title="MK-677" icon={<FlaskConical size={14} />}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-          <NumInput label="Dosis (mg)" value={entry.mk677.dose} onChange={v => update('mk677.dose', v)} step={5} />
-          <TimeInput label="Tidspunkt" value={entry.mk677.time} onChange={v => update('mk677.time', v)} />
-        </div>
-        <div style={{ fontSize: 11, color: COLORS.textDim, marginBottom: 8, letterSpacing: '0.08em' }}>BIVIRKNINGER (0-10)</div>
-        {['hunger', 'water', 'fatigue', 'sleep', 'tingling'].map(k => (
-          <SliderRow
-            key={k}
-            label={{ hunger: 'Sult', water: 'Vandretention', fatigue: 'Træthed', sleep: 'Søvnkvalitet', tingling: 'Tingling/numbness' }[k]}
-            value={entry.mk677.sideEffects[k] || 0}
-            onChange={v => update(`mk677.sideEffects.${k}`, v)}
-          />
-        ))}
-      </Section>
-
       {/* Sleep */}
       <Section title="SØVN" icon={<Moon size={14} />}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
@@ -1937,6 +2904,34 @@ function BackupSection() {
     }
     setExportData(JSON.stringify(data, null, 2));
     setShowExport(true);
+    await safeSet('backup:last', new Date().toISOString());
+  };
+
+  const shareExport = async () => {
+    const fname = `peakform-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    try {
+      const file = new File([exportData], fname, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'PeakForm backup' });
+        setImportMsg('Backup delt ✓');
+        setTimeout(() => setImportMsg(''), 2000);
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+    try {
+      const a = document.createElement('a');
+      a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(exportData);
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setImportMsg('Backup-fil hentet ✓');
+      setTimeout(() => setImportMsg(''), 2000);
+    } catch (e) {
+      setImportMsg('Kunne ikke gemme fil — brug KOPIÉR');
+    }
   };
 
   const copyExport = async () => {
@@ -1966,7 +2961,19 @@ function BackupSection() {
   return (
     <Section title="BACKUP">
       <div style={{ fontSize: 12, color: COLORS.textDim, marginBottom: 12, lineHeight: 1.5 }}>
-        Hvis persistent storage ikke virker, kan du kopiere dine data ud og indsætte det igen senere.
+        Eksportér dine data regelmæssigt — gem filen i Filer/iCloud.
+      </div>
+      <div className="mono" style={{
+        fontSize: 10,
+        color: COLORS.accent,
+        border: `1px solid ${COLORS.accentDim.slice(0, 7)}`,
+        background: COLORS.accentDim,
+        padding: '9px 11px',
+        marginBottom: 12,
+        lineHeight: 1.5,
+        letterSpacing: '0.04em',
+      }}>
+        ⚠ SLET ALDRIG APPEN FRA HJEMMESKÆRMEN — DET SLETTER ALLE DATA. NYE VERSIONER KRÆVER KUN LUK + GENÅBN.
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
         <button
@@ -2028,6 +3035,21 @@ function BackupSection() {
               fontFamily: 'Anton, sans-serif',
             }}
           >KOPIÉR</button>
+          <button
+            onClick={shareExport}
+            style={{
+              width: '100%',
+              marginTop: 8,
+              background: COLORS.surfaceLight,
+              border: `1px solid ${COLORS.accent}`,
+              color: COLORS.accent,
+              padding: '10px',
+              fontSize: 12,
+              letterSpacing: '0.1em',
+              cursor: 'pointer',
+              fontFamily: 'Anton, sans-serif',
+            }}
+          >GEM SOM FIL</button>
         </>
       )}
       {showExport === 'import' && (
@@ -2089,9 +3111,32 @@ function Section({ title, icon, children }) {
   );
 }
 
-function ExerciseBlock({ exercise, sets, history, onChange }) {
+// Tiny sparkline: array of numbers → flat SVG line (no axes).
+function Sparkline({ values, color, width = 64, height = 18 }) {
+  if (!values || values.length < 2) return null;
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const stepX = width / (values.length - 1);
+  const pts = values.map((v, i) => `${(i * stepX).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`).join(' ');
+  const lastUp = values[values.length - 1] >= values[0];
+  return (
+    <svg width={width} height={height} style={{ display: 'block' }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />
+    </svg>
+  );
+}
+
+function ExerciseBlock({ exercise, sets, history, onChange, currentDate, workoutName }) {
   const numSets = exercise.sets;
   const currentSets = Array.from({ length: numSets }, (_, i) => sets[i] || { kg: '', reps: '' });
+
+  // "Sidst" / "Last PR" must reflect sessions STRICTLY BEFORE the day being
+  // viewed — not just "not today". So when you open an older date, the references
+  // look back to the session before THAT date, not the global latest. Sorted
+  // newest-first so lastSetAt picks the nearest prior session.
+  const pastHistory = history
+    .filter(h => h.date < currentDate)
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   const updateSet = (idx, field, value) => {
     const newSets = [...currentSets];
@@ -2099,45 +3144,222 @@ function ExerciseBlock({ exercise, sets, history, onChange }) {
     onChange(newSets);
   };
 
-  const last3 = history.slice(0, 3);
-  const pr = history.length > 0 ? history.reduce((a, b) => (a.kg > b.kg ? a : b)) : null;
+  // Everything below is PER SET INDEX, over sessions before the viewed day:
+  //  • Sidst       = the raw set logged for THIS set number in the nearest prior session.
+  //  • Volumen-PR  = best set ever for THIS set number ranked by VOLUME (kg×reps).
+  //  • Vægt-PR     = best set ever for THIS set number ranked by heaviest kg.
+  //  • ghost       = recommended progression based on that set's last performance.
+
+  // Nearest prior logged set for a given set index (newest → oldest).
+  const lastSetAt = (idx) => {
+    for (const h of pastHistory) {
+      const s = h.sets && h.sets[idx];
+      if (s && s.kg) return s;
+    }
+    return null;
+  };
+
+  const setVolume = (s) => (parseFloat(s.kg) || 0) * (parseInt(s.reps, 10) || 0);
+
+  // Per-set PR ranked by VOLUME (kg × reps), so e.g. 55×45 beats 72.5×6.
+  const volumePrAt = (idx) => {
+    let best = null;
+    for (const h of pastHistory) {
+      const s = h.sets && h.sets[idx];
+      if (s && s.kg && (!best || setVolume(s) > setVolume(best))) best = s;
+    }
+    return best;
+  };
+
+  // Per-set PR ranked by heaviest WEIGHT (the original PR).
+  const weightPrAt = (idx) => {
+    let best = null;
+    for (const h of pastHistory) {
+      const s = h.sets && h.sets[idx];
+      if (s && s.kg && (!best || parseFloat(s.kg) > parseFloat(best.kg))) best = s;
+    }
+    return best;
+  };
+
+  // Per-set suggestion: progress that set's last real performance.
+  const setSuggestion = (idx) => {
+    const prev = lastSetAt(idx);
+    if (!prev) return { weight: 0, reps: exercise.target, reason: 'Ny øvelse' };
+    return suggestNextWeight({ kg: prev.kg, reps: prev.reps, rpe: prev.rpe }, exercise.target, exercise, pastHistory);
+  };
+
+  const hasAnyHistory = pastHistory.length > 0;
+
+  // ─── Whole-exercise summary stats (over sessions before the viewed day) ───
+  // 1) Last session average: avg kg × avg reps of the nearest prior session.
+  const lastSessionAvg = (() => {
+    const last = pastHistory[0];
+    const arr = (last && last.sets || []).filter(s => s && s.kg && s.reps);
+    if (arr.length === 0) return null;
+    const avgKg = arr.reduce((t, s) => t + (parseFloat(s.kg) || 0), 0) / arr.length;
+    const avgReps = arr.reduce((t, s) => t + (parseInt(s.reps, 10) || 0), 0) / arr.length;
+    return { kg: Math.round(avgKg * 10) / 10, reps: Math.round(avgReps) };
+  })();
+
+  // 2 & 3) Whole-exercise PRs: best single set across ALL set positions, all time.
+  const allPastSets = pastHistory.flatMap(h => (h.sets || []).filter(s => s && s.kg && s.reps));
+  const exVolumePR = allPastSets.reduce((b, s) => (!b || setVolume(s) > setVolume(b) ? s : b), null);
+  const exWeightPR = allPastSets.reduce((b, s) => (!b || parseFloat(s.kg) > parseFloat(b.kg) ? s : b), null);
+
+  // ── Feature helpers ──────────────────────────────────────────────
+  const e1rm = (s) => (parseFloat(s.kg) || 0) * (1 + (parseInt(s.reps, 10) || 0) / 30);
+  // Per-session top metric series (newest→oldest) used for trend + sparkline.
+  const sessionTopWeight = pastHistory.map(h => {
+    const arr = (h.sets || []).filter(s => s && s.kg && s.reps);
+    if (!arr.length) return null;
+    const top = arr.reduce((b, s) => (parseFloat(s.kg) > parseFloat(b.kg) ? s : b));
+    return { date: h.date, kg: parseFloat(top.kg), reps: parseInt(top.reps, 10), e1rm: e1rm(top) };
+  }).filter(Boolean);
+
+  // FEATURE 1: trend = top-weight delta, latest prior session vs the one before.
+  const trendDelta = (sessionTopWeight.length >= 2)
+    ? Math.round((sessionTopWeight[0].kg - sessionTopWeight[1].kg) * 10) / 10
+    : null;
+
+  // FEATURE 2: sparkline points = last up-to-7 sessions' e1RM, oldest→newest.
+  const sparkVals = sessionTopWeight.slice(0, 7).map(s => s.e1rm).reverse();
+
+  // FEATURE 3: days since each PR was set.
+  const daysSince = (dateStr) => {
+    if (!dateStr) return null;
+    return Math.round((new Date(currentDate + 'T12:00:00') - new Date(dateStr + 'T12:00:00')) / 86400000);
+  };
+  const volPrEntry = pastHistory.find(h => (h.sets || []).some(s => s && parseFloat(s.kg) === parseFloat(exVolumePR?.kg) && parseInt(s.reps,10) === parseInt(exVolumePR?.reps,10)));
+  const wtPrEntry = pastHistory.find(h => (h.sets || []).some(s => s && parseFloat(s.kg) === parseFloat(exWeightPR?.kg) && parseInt(s.reps,10) === parseInt(exWeightPR?.reps,10)));
+
+  // FEATURE 4: best e1RM across all past sets.
+  const exE1RM = allPastSets.reduce((b, s) => (!b || e1rm(s) > e1rm(b) ? s : b), null);
+
+  // FEATURE 6: per-exercise goal weight (localStorage, synchronous).
+  const goalKey = 'goal:' + exercise.id;
+  const [goal, setGoal] = useState(() => {
+    try { return parseFloat(window.localStorage.getItem('complete:' + goalKey)) || 0; } catch { return 0; }
+  });
+  const saveGoal = (v) => {
+    const n = parseFloat(v) || 0;
+    setGoal(n);
+    try { window.localStorage.setItem('complete:' + goalKey, String(n)); } catch {}
+  };
+  const goalPct = (goal > 0 && exWeightPR) ? Math.min(100, Math.round((parseFloat(exWeightPR.kg) / goal) * 100)) : 0;
+
+  // FEATURE 5: expandable history toggle.
+  const [showHist, setShowHist] = useState(false);
 
   return (
     <div style={{ paddingBottom: 16, marginBottom: 16, borderBottom: `1px solid ${COLORS.border}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-        <div className="display" style={{ fontSize: 16, letterSpacing: '0.04em' }}>{exercise.name}</div>
-        <div className="mono" style={{ fontSize: 11, color: COLORS.textDim }}>
+      {/* Header — bigger / more visible */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+        <div className="display" style={{ fontSize: 20, letterSpacing: '0.03em', color: COLORS.text }}>{exercise.name}</div>
+        <div className="mono" style={{ fontSize: 11, color: COLORS.accent, letterSpacing: '0.05em' }}>
           {exercise.sets} × {exercise.reps}
         </div>
       </div>
 
-      {/* Last sessions */}
-      {last3.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-          {pr && (
-            <div className="mono" style={{
-              fontSize: 10,
-              padding: '3px 6px',
-              background: COLORS.accentDim,
-              color: COLORS.accent,
-              letterSpacing: '0.05em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-            }}>
-              <Trophy size={10} /> PR {pr.kg}kg×{pr.reps}
+      {/* Per-exercise overall stats — instrument cards (2×2) + goal + history */}
+      {hasAnyHistory ? (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
+            {[
+              { key: 'avg', label: `SIDSTE ${(workoutName || '').toUpperCase()} GNS.`, val: lastSessionAvg, color: COLORS.text, icon: <Activity size={10} />, trend: trendDelta, fresh: null, spark: null },
+              { key: 'e1rm', label: 'EST. 1RM', val: exE1RM ? { kg: Math.round(e1rm(exE1RM)), reps: null } : null, color: '#FF8A3D', icon: <TrendingUp size={10} />, trend: null, fresh: null, spark: sparkVals },
+              { key: 'vol', label: 'VOLUMEN-PR', val: exVolumePR, color: COLORS.green, icon: <Trophy size={10} />, trend: null, fresh: daysSince(volPrEntry?.date) },
+              { key: 'wt', label: 'VÆGT-PR', val: exWeightPR, color: COLORS.accent, icon: <Trophy size={10} />, trend: null, fresh: daysSince(wtPrEntry?.date) },
+            ].map((c) => (
+              <div key={c.key} style={{
+                position: 'relative',
+                background: COLORS.surface,
+                border: `1px solid ${COLORS.border}`,
+                borderTop: `2px solid ${c.color}`,
+                padding: '9px 9px 8px',
+                overflow: 'hidden',
+              }}>
+                <CornerTicks color={c.color} size={6} inset={4} weight={1} />
+                <div className="mono" style={{
+                  fontSize: 7.5, letterSpacing: '0.1em', color: COLORS.textDim,
+                  marginBottom: 6, display: 'flex', alignItems: 'center', gap: 3, lineHeight: 1.3,
+                }}>
+                  <span style={{ color: c.color, display: 'inline-flex' }}>{c.icon}</span>
+                  {c.label}
+                </div>
+                {c.val ? (
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                      <span className="display" style={{ fontSize: 20, lineHeight: 1, color: c.color }}>{c.val.kg}</span>
+                      <span className="mono" style={{ fontSize: 9, color: COLORS.textDim }}>kg</span>
+                      {c.val.reps != null && <span className="mono" style={{ fontSize: 11, color: COLORS.textDim, marginLeft: 2 }}>×{c.val.reps}</span>}
+                    </div>
+                    {c.spark && c.spark.length >= 2 && <Sparkline values={c.spark} color={c.color} />}
+                    {c.trend != null && c.trend !== 0 && (
+                      <span className="mono" style={{ fontSize: 9, color: c.trend > 0 ? COLORS.green : COLORS.red, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                        {c.trend > 0 ? '▲' : '▼'} {Math.abs(c.trend)}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="display" style={{ fontSize: 20, lineHeight: 1, color: COLORS.textMore }}>—</div>
+                )}
+                {c.fresh != null && (
+                  <div className="mono" style={{ fontSize: 7.5, color: COLORS.textMore, marginTop: 4, letterSpacing: '0.05em' }}>
+                    {c.fresh === 0 ? 'I DAG' : `${c.fresh} DAGE SIDEN`}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* FEATURE 6: goal progress toward a target weight */}
+          <div style={{ marginTop: 8, background: COLORS.surface, border: `1px solid ${COLORS.border}`, padding: '8px 10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span className="mono" style={{ fontSize: 8, letterSpacing: '0.1em', color: COLORS.textDim }}>MÅL (VÆGT)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <input
+                  type="number" inputMode="decimal" value={goal || ''} onChange={e => saveGoal(e.target.value)} placeholder="sæt mål"
+                  className="mono"
+                  style={{ width: 64, background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`, color: COLORS.text, fontSize: 16, textAlign: 'center', padding: '4px 6px', borderRadius: 2 }}
+                />
+                <span className="mono" style={{ fontSize: 9, color: COLORS.textDim }}>kg</span>
+              </div>
+            </div>
+            {goal > 0 && (
+              <div>
+                <div style={{ height: 6, background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${goalPct}%`, background: goalPct >= 100 ? COLORS.green : COLORS.accent, transition: 'width 0.3s' }} />
+                </div>
+                <div className="mono" style={{ fontSize: 8, color: COLORS.textDim, marginTop: 4, letterSpacing: '0.04em' }}>
+                  {exWeightPR ? `${exWeightPR.kg}` : '0'} / {goal} kg · {goalPct}%{goalPct >= 100 ? ' — MÅL NÅET' : ''}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* FEATURE 5: tap to expand full history */}
+          <button onClick={() => setShowHist(!showHist)} className="pf-press" style={{
+            width: '100%', marginTop: 8, background: 'transparent', border: `1px solid ${COLORS.border}`,
+            color: COLORS.textDim, padding: '7px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+          }}>
+            <span className="mono" style={{ fontSize: 8, letterSpacing: '0.14em' }}>{showHist ? 'SKJUL HISTORIK' : 'VIS HISTORIK'}</span>
+          </button>
+          {showHist && (
+            <div style={{ marginTop: 6, border: `1px solid ${COLORS.border}`, background: COLORS.surface }}>
+              {sessionTopWeight.length === 0 ? (
+                <div className="mono" style={{ fontSize: 9, color: COLORS.textDim, padding: '8px 10px' }}>Ingen historik</div>
+              ) : sessionTopWeight.map((s, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', borderBottom: i < sessionTopWeight.length - 1 ? `1px solid ${COLORS.border}` : 'none' }}>
+                  <span className="mono" style={{ fontSize: 9, color: COLORS.textDim }}>{formatDate(s.date)}</span>
+                  <span className="mono" style={{ fontSize: 9, color: COLORS.text }}>{s.kg}kg × {s.reps} <span style={{ color: COLORS.textMore }}>· e1RM {Math.round(s.e1rm)}</span></span>
+                </div>
+              ))}
             </div>
           )}
-          {last3.map((h, i) => (
-            <div key={i} className="mono" style={{
-              fontSize: 10,
-              padding: '3px 6px',
-              background: COLORS.surfaceLight,
-              color: COLORS.textDim,
-            }}>
-              {h.kg}×{h.reps}
-            </div>
-          ))}
+        </div>
+      ) : (
+        <div className="mono" style={{ fontSize: 10, color: COLORS.textMore, marginBottom: 10, letterSpacing: '0.03em' }}>
+          Ny øvelse — find en vægt med ~2 reps i reserve
         </div>
       )}
 
@@ -2147,18 +3369,45 @@ function ExerciseBlock({ exercise, sets, history, onChange }) {
         <div style={{ flex: 1, fontSize: 10, color: COLORS.textMore, letterSpacing: '0.1em', textAlign: 'center' }}>KG</div>
         <div style={{ flex: 1, fontSize: 10, color: COLORS.textMore, letterSpacing: '0.1em', textAlign: 'center' }}>REPS</div>
       </div>
-      {currentSets.map((set, idx) => (
-        <div key={idx} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-          <div className="mono" style={{ width: 24, color: COLORS.textDim, fontSize: 13 }}>{idx + 1}</div>
-          <SetInput value={set.kg} onChange={v => updateSet(idx, 'kg', v)} />
-          <SetInput value={set.reps} onChange={v => updateSet(idx, 'reps', v)} />
-        </div>
-      ))}
+      {currentSets.map((set, idx) => {
+        const sug = setSuggestion(idx);
+        const prev = lastSetAt(idx);       // raw last-logged for THIS set number
+        const volPR = volumePrAt(idx);     // best by volume (kg×reps)
+        const wtPR = weightPrAt(idx);      // best by weight (kg)
+        const lastLabel = `Sidste ${workoutName || ''} træning`.replace('  ', ' ');
+        return (
+          <div key={idx} style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <div className="mono" style={{ width: 24, color: COLORS.textDim, fontSize: 13 }}>{idx + 1}</div>
+              <SetInput value={set.kg} onChange={v => updateSet(idx, 'kg', v)} placeholder={sug.weight > 0 ? String(sug.weight) : '—'} />
+              <SetInput value={set.reps} onChange={v => updateSet(idx, 'reps', v)} placeholder={sug.reps ? String(sug.reps) : '—'} />
+            </div>
+            {/* Three references, per set: last session (visible), Volumen-PR (visible), Vægt-PR (red/dim) */}
+            <div className="mono" style={{ fontSize: 9, margin: '4px 0 0 30px', letterSpacing: '0.02em', lineHeight: 1.7 }}>
+              <div style={{ color: COLORS.text }}>
+                {lastLabel}: {prev ? `${prev.kg}kg × ${prev.reps}${prev.rpe ? ` · RPE ${prev.rpe}` : ''}` : '—'}
+              </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {volPR && (
+                  <span style={{ color: COLORS.green, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <Trophy size={9} /> Volumen-PR: {volPR.kg}kg × {volPR.reps}
+                  </span>
+                )}
+                {wtPR && (
+                  <span style={{ color: COLORS.accent, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <Trophy size={9} /> Vægt-PR: {wtPR.kg}kg × {wtPR.reps}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function SetInput({ value, onChange }) {
+function SetInput({ value, onChange, placeholder = '—' }) {
   return (
     <input
       type="number"
@@ -2166,7 +3415,7 @@ function SetInput({ value, onChange }) {
       className="mono"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder="—"
+      placeholder={placeholder}
       style={{
         flex: 1,
         background: COLORS.surfaceLight,
@@ -2565,7 +3814,7 @@ function ActiveSession({ session, setSession, entry, update, history, onEnd, onH
   const lastSet = completedThisSession.length > 0
     ? completedThisSession[completedThisSession.length - 1]
     : (exHistory[0] ? { kg: exHistory[0].kg, reps: exHistory[0].reps, rpe: null } : null);
-  const suggestion = suggestNextWeight(lastSet, currentExercise?.target || 8);
+  const suggestion = suggestNextWeight(lastSet, currentExercise?.target || 8, currentExercise, exHistory);
 
   // Log set
   const logSet = (kg, reps) => {
@@ -2652,7 +3901,7 @@ function ActiveSession({ session, setSession, entry, update, history, onEnd, onH
   };
 
   if (session.phase === 'done') {
-    return <SessionSummary session={session} totalVolume={totalVolume} elapsed={elapsed} onEnd={onEnd} />;
+    return <SessionSummary session={session} totalVolume={totalVolume} elapsed={elapsed} onEnd={onEnd} history={history} />;
   }
 
   return (
@@ -3195,18 +4444,26 @@ function RestView({ session, now, currentExercise, suggestion, onSkip, onAdjust 
   );
 }
 
-function SessionSummary({ session, totalVolume, elapsed, onEnd }) {
+function SessionSummary({ session, totalVolume, elapsed, onEnd, history = {} }) {
   const completedSets = session.completedSets || [];
   const exercisesDone = new Set(completedSets.map(s => s.exId)).size;
 
-  // Find PRs in this session
-  const prs = [];
+  // Best set per exercise this session
   const exerciseMaxes = {};
   completedSets.forEach(s => {
     if (!exerciseMaxes[s.exId] || s.kg > exerciseMaxes[s.exId].kg) {
       exerciseMaxes[s.exId] = s;
     }
   });
+
+  // EARNED PRs: a set this session that beats the prior all-time best load for
+  // that exercise. PR appears here as a milestone — never as a default input.
+  const exName = (exId) => Object.values(PROGRAM).flatMap(p => p.exercises).find(e => e.id === exId)?.name || exId;
+  const newPRs = Object.entries(exerciseMaxes).map(([exId, s]) => {
+    const past = history[exId] || [];
+    const priorBest = past.reduce((m, h) => Math.max(m, parseFloat(h.kg) || 0), 0);
+    return (parseFloat(s.kg) || 0) > priorBest ? { exId, ...s, priorBest } : null;
+  }).filter(Boolean);
 
   const avgRPE = completedSets.length > 0
     ? (completedSets.reduce((sum, s) => sum + (s.rpe || 0), 0) / completedSets.length).toFixed(1)
@@ -3229,6 +4486,33 @@ function SessionSummary({ session, totalVolume, elapsed, onEnd }) {
           GOD INDSATS
         </div>
       </div>
+
+      {/* Earned milestone: PR celebration (only when truly beaten) */}
+      {newPRs.length > 0 ? (
+        <div style={{
+          border: `1px solid ${COLORS.accent}`,
+          background: COLORS.accentDim,
+          padding: '14px 16px',
+          marginBottom: 24,
+        }}>
+          <div className="mono" style={{ fontSize: 10, letterSpacing: '0.3em', color: COLORS.accent, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Trophy size={12} /> NY PR{newPRs.length > 1 ? ` ×${newPRs.length}` : ''}
+          </div>
+          {newPRs.map(pr => (
+            <div key={pr.exId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+              <div style={{ fontSize: 13 }}>{exName(pr.exId)}</div>
+              <div className="mono" style={{ fontSize: 13, color: COLORS.accent }}>
+                {pr.kg}kg × {pr.reps}
+                {pr.priorBest > 0 && <span style={{ color: COLORS.textDim, fontSize: 10 }}> (før {pr.priorBest}kg)</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mono" style={{ fontSize: 11, color: COLORS.textDim, textAlign: 'center', marginBottom: 24, letterSpacing: '0.05em' }}>
+          Du mødte op og gennemførte. Konsistens slår PR-jagt.
+        </div>
+      )}
 
       <div style={{
         display: 'grid',
